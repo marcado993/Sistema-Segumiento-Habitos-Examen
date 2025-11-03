@@ -29,15 +29,32 @@ public class PointsService {
      */
     public int calculatePoints(String estado) {
         if (estado == null || estado.trim().isEmpty()) {
+            System.out.println("⚠️ Estado es null o vacío, retornando 0 puntos");
             return 0;
         }
         
-        return switch (estado.toUpperCase().trim()) {
-            case "CUMPLIDO" -> PUNTOS_CUMPLIDO;
-            case "PARCIAL" -> PUNTOS_PARCIAL;
-            case "NO_CUMPLIDO" -> PUNTOS_NO_CUMPLIDO;
-            default -> 0;
-        };
+        String estadoNormalizado = estado.toUpperCase().trim();
+        System.out.println("🎮 Calculando puntos para estado: " + estadoNormalizado);
+        
+        int puntos;
+        switch (estadoNormalizado) {
+            case "CUMPLIDO":
+                puntos = PUNTOS_CUMPLIDO;
+                break;
+            case "PARCIAL":
+                puntos = PUNTOS_PARCIAL;
+                break;
+            case "NO_CUMPLIDO":
+                puntos = PUNTOS_NO_CUMPLIDO;
+                break;
+            default:
+                System.out.println("⚠️ Estado desconocido: " + estadoNormalizado + ", retornando 0 puntos");
+                puntos = 0;
+                break;
+        }
+        
+        System.out.println("✅ Puntos calculados: " + puntos);
+        return puntos;
     }
     
     /**

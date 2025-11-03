@@ -1,10 +1,10 @@
 package com.sistema_seguimiento.servlet;
 
 import com.sistema_seguimiento.dao.HabitoDAO;
-import com.sistema_seguimiento.dao.PetDAO;
-import com.sistema_seguimiento.model.*;
+import com.sistema_seguimiento.model.Habito;
+import com.sistema_seguimiento.model.RegistroHabito;
+import com.sistema_seguimiento.model.Usuario;
 import com.sistema_seguimiento.services.HabitoServicio;
-import com.sistema_seguimiento.services.PetUnlockService;
 import com.sistema_seguimiento.services.PointsService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -15,26 +15,17 @@ import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Controlador de Hábitos según el diagrama de clases
  * Maneja las operaciones relacionadas con hábitos
- * 
- * 🟢 FASE VERDE - Integrado con PointsService
  */
 @WebServlet("/controlador-habitos")
 public class ControladorHabitos extends HttpServlet {
 
     private final HabitoServicio habitoServicio = new HabitoServicio();
-    
-    /**
-     * 🟢 FASE VERDE - PointsService para gamificación
-     */
     private PointsService pointsService = new PointsService();
-    private RegistroHabito registroExistente;
 
     @Override
     public void init() throws ServletException {
@@ -43,15 +34,12 @@ public class ControladorHabitos extends HttpServlet {
     }
     
     /**
-     * 🟢 FASE VERDE - Setter para inyección de dependencias (usado en tests)
+     * Setters para inyección de dependencias (necesario para tests con mocks)
      */
     public void setHabitoDAO(HabitoDAO habitoDAO) {
         habitoServicio.setHabitoDAO(habitoDAO);
     }
     
-    /**
-     * 🟢 FASE VERDE - Setter para inyección de PointsService (usado en tests)
-     */
     public void setPointsService(PointsService pointsService) {
         this.pointsService = pointsService;
     }
@@ -312,11 +300,8 @@ public class ControladorHabitos extends HttpServlet {
                 if (habito != null) {
                     System.out.println("✅ Registro exitoso del hábito ID: " + habitoId);
                     
-                    // 🟢 FASE VERDE - Agregar puntos al usuario después del registro exitoso
-                    if (estadoStr != null && pointsService != null) {
-                        pointsService.addPointsToUser(usuarioId, estadoStr);
-                        System.out.println("🎮 Puntos procesados para estado: " + estadoStr);
-                    }
+                    // Agregar puntos al usuario según el estado del hábito
+                    pointsService.addPointsToUser(usuarioId, estadoStr);
                     
                     response.sendRedirect("controlador-habitos?action=view&usuarioId=" + usuarioId + "&success=true");
                 } else {
@@ -363,226 +348,80 @@ public class ControladorHabitos extends HttpServlet {
      * @param usuarioId El ID del usuario que realiza el registro.
      * @throws IOException si ocurre un error durante la redirección.
      */
-private void procesarRegistroCumplimiento(HttpServletRequest request, HttpServletResponse response, Integer usuarioId) throws IOException {
-    String habitoIdStr = request.getParameter("habitoId");
-    String notas = request.getParameter("notas");
-    String vecesRealizadoStr = request.getParameter("vecesRealizado");
-    String estadoAnimo = request.getParameter("estadoAnimo");
-    String fechaStr = request.getParameter("fecha");
-    String estado = request.getParameter("estado"); // CUMPLIDO, NO_CUMPLIDO, PARCIAL
-
-    System.out.println("--- Iniciando procesarRegistroCumplimiento ---");
-    System.out.println("   Recibido habitoId: " + habitoIdStr);
-    System.out.println("   Recibido estado: " + estado); // <-- ¡VERIFICA ESTO EN EL LOG!
-    System.out.println("   Recibido fechaStr: " + fechaStr); // <-- ¡VERIFICA ESTO EN EL LOG!
-    System.out.println("   Recibido vecesRealizadoStr: " + vecesRealizadoStr);
-    System.out.println("   Recibido estadoAnimo: " + estadoAnimo);
-    System.out.println("   Recibido notas: " + notas);
-
-
-    // 1. Validar y Parsear Parámetros Esenciales
-    Integer habitoId = null;
-    LocalDate fecha = LocalDate.now(); // Default a hoy
-
-    if (habitoIdStr == null || habitoIdStr.trim().isEmpty()) {
-        System.err.println("❌ Error: No se proporcionó habitoId.");
-        response.sendRedirect("controlador-habitos?action=list&usuarioId=" + usuarioId + "&error=missing_habitoId");
-        return;
-    }
-    try {
-        habitoId = Integer.parseInt(habitoIdStr);
-    } catch (NumberFormatException e) {
-        System.err.println("❌ Error: habitoId inválido: " + habitoIdStr);
-        response.sendRedirect("controlador-habitos?action=list&usuarioId=" + usuarioId + "&error=invalid_habitoId");
-        return;
-    }
-
-    if (fechaStr != null && !fechaStr.trim().isEmpty()) {
-        try {
-            fecha = LocalDate.parse(fechaStr);
-        } catch (DateTimeParseException e) {
-            System.err.println("❌ Error al parsear fecha: " + fechaStr + " - Usando fecha actual.");
-            // Podrías redirigir con error si la fecha es obligatoria y mal formateada
-            // response.sendRedirect("controlador-habitos?action=list&usuarioId=" + usuarioId + "&error=invalid_date");
-            // return;
-        }
-    } else {
-        System.out.println("   -> Fecha no proporcionada, usando fecha actual: " + fecha);
-    }
-
-    // Si estado sigue siendo null aquí, el problema está 100% en el JSP
-    if (estado == null || estado.trim().isEmpty()) {
-        System.err.println("⚠️ Advertencia: El parámetro 'estado' (CUMPLIDO/PARCIAL/NO_CUMPLIDO) no llegó del formulario.");
-        // Puedes decidir si continuar, poner un default, o fallar
-        // Por ahora, continuaremos, pero la lógica de puntos fallará.
-        // estado = "NO_CUMPLIDO"; // Ejemplo de default si quisieras
-    }
-
-
-    // 2. Buscar Hábito
-    Habito habito = habitoServicio.buscarHabito(habitoId);
-    if (habito == null) {
-        System.err.println("❌ Error: Hábito no encontrado con ID: " + habitoId);
-        response.sendRedirect("controlador-habitos?action=list&usuarioId=" + usuarioId + "&error=habito_notfound");
-        return;
-    }
-
-    // 3. Parsear 'vecesRealizado'
-    Integer vecesRealizado = 0; // Default a 0 si no se cumple nada
-    if (vecesRealizadoStr != null && !vecesRealizadoStr.isEmpty()) {
-        try {
-            vecesRealizado = Integer.parseInt(vecesRealizadoStr);
-            if (vecesRealizado < 0) vecesRealizado = 0; // No permitir negativos
-        } catch (NumberFormatException e) {
-            System.err.println("   -> vecesRealizado inválido: " + vecesRealizadoStr + " - Usando default 0.");
-            // Si el estado es CUMPLIDO o PARCIAL, quizá poner 1 por defecto? Depende tu lógica.
-            if ("CUMPLIDO".equals(estado) || "PARCIAL".equals(estado)) {
-                vecesRealizado = 1; // Un default razonable si el formato falla pero se marcó como hecho
-            } else {
-                vecesRealizado = 0;
-            }
-        }
-    } else if ("CUMPLIDO".equals(estado)) {
-        // Si no se envió 'vecesRealizado' pero se marcó CUMPLIDO, asumir meta cumplida
-        vecesRealizado = obtenerMetaDiariaOPredeterminada(habito);
-        System.out.println("   -> vecesRealizado no proporcionado pero estado=CUMPLIDO, asumiendo meta: " + vecesRealizado);
-    } else if ("PARCIAL".equals(estado)) {
-        // Si no se envió 'vecesRealizado' pero se marcó PARCIAL, asumir 1
-        vecesRealizado = 1;
-        System.out.println("   -> vecesRealizado no proporcionado pero estado=PARCIAL, asumiendo 1.");
-    } else {
-        System.out.println("   -> vecesRealizado no proporcionado y estado no es CUMPLIDO/PARCIAL, usando default 0.");
-        vecesRealizado = 0;
-    }
-
-
-    // 4. Buscar o Crear/Actualizar RegistroHabito
-    RegistroHabito registroParaGuardar = null;
-    RegistroHabito registroGuardado = null;
-    HabitoDAO dao = habitoServicio.getHabitoDAO();
-
-    try {
-        // Buscar si ya existe un registro para este hábito en esta fecha
-        registroExistente = dao.findRegistroByFecha(habitoId, fecha);
-
-        Integer metaDiaria = obtenerMetaDiariaOPredeterminada(habito);
-        // Determinar el estado 'completado' basado en la lógica
-        boolean cumplido;
-        if ("NO_CUMPLIDO".equals(estado)) {
-            cumplido = false;
-            // Si no se cumplió, forzar vecesRealizado a 0 podría ser una opción
-            // vecesRealizado = 0;
-        } else {
-            // Si es CUMPLIDO, PARCIAL, o estado es null, basarse en vecesRealizado vs meta
-            cumplido = (vecesRealizado >= metaDiaria);
-        }
-
-        if (registroExistente != null) {
-            // Actualizar el existente
-            System.out.println("   -> Registro existente encontrado (ID: " + registroExistente.getId() + "), actualizando...");
-            registroParaGuardar = registroExistente;
-            registroParaGuardar.setNotas(notas); // Actualizar campos
-            registroParaGuardar.setVecesRealizado(vecesRealizado);
-            registroParaGuardar.setEstadoAnimo(estadoAnimo != null && !estadoAnimo.isEmpty() ? estadoAnimo : registroParaGuardar.getEstadoAnimo()); // Mantener el ánimo si no se envía nuevo
-            registroParaGuardar.setCompletado(cumplido); // Actualizar estado de completado
-
-        } else {
-            // Crear uno nuevo
-            System.out.println("   -> No existe registro para esta fecha, creando uno nuevo...");
-            registroParaGuardar = new RegistroHabito();
-            registroParaGuardar.setHabito(habito);
-            registroParaGuardar.setFecha(fecha);
-            registroParaGuardar.setNotas(notas);
-            registroParaGuardar.setVecesRealizado(vecesRealizado);
-            registroParaGuardar.setEstadoAnimo(estadoAnimo != null && !estadoAnimo.isEmpty() ? estadoAnimo : "neutral");
-            registroParaGuardar.setCompletado(cumplido);
-        }
-
-        System.out.println("📝 Objeto RegistroHabito listo para guardar/actualizar:");
-        System.out.println("   - ID (si existe): " + registroParaGuardar.getId());
-        System.out.println("   - Hábito ID: " + habitoId);
-        System.out.println("   - Fecha: " + fecha);
-        System.out.println("   - Veces realizado: " + registroParaGuardar.getVecesRealizado());
-        System.out.println("   - Calculado Completado: " + registroParaGuardar.getCompletado());
-        System.out.println("   - Estado de ánimo: " + registroParaGuardar.getEstadoAnimo());
-        System.out.println("   - Notas: " + registroParaGuardar.getNotas());
-
-        // 5. Guardar (Insertar o Actualizar) el Registro
-        registroGuardado = dao.saveRegistro(registroParaGuardar); // saveRegistro debe manejar merge si el ID ya existe
-
-    } catch (Exception e) {
-        System.err.println("❌ Error CRÍTICO durante búsqueda o preparación/guardado de RegistroHabito: " + e.getMessage());
-        e.printStackTrace();
-        // Redirigir a una página de error o a la lista con un mensaje de error DB
-        response.sendRedirect("controlador-habitos?action=list&usuarioId=" + usuarioId + "&error=dberror_register");
-        return; // Salir del método
-    }
-
-
-    // 6. Ejecutar Lógica Post-Guardado (Puntos y Mascotas) SOLO si se guardó bien
-    if (registroGuardado != null && registroGuardado.getId() != null) {
-        System.out.println("✅ Registro de hábito guardado/actualizado ID: " + registroGuardado.getId());
-
-        // Llamada a PointsService (Usa el 'estado' recibido del form)
-        if (estado != null && pointsService != null) {
-            pointsService.addPointsToUser(usuarioId, estado);
-            // El log está dentro de addPointsToUser
-        } else {
-            System.out.println("   -> No se procesaron puntos (estado nulo o pointsService nulo)");
-        }
-
-        // --- Lógica de PetUnlockService (Tarea 8) ---
-        try {
-            // Usar el mismo DAO instanciado antes
-            long totalHabitosCumplidos = dao.countTotalHabitosCumplidosPorUsuario(usuarioId);
-            System.out.println("🐾 Total hábitos/días cumplidos para PetUnlockService: " + totalHabitosCumplidos);
-
-            PetUnlockService petUnlockService = new PetUnlockService();
-            PetType tipoMascotaAlcanzado = petUnlockService.checkEvolution(Long.valueOf(usuarioId), (int) totalHabitosCumplidos);
-
-            if (tipoMascotaAlcanzado != null) {
-                System.out.println("🐾 Umbral de mascota alcanzado según PetUnlockService: " + tipoMascotaAlcanzado);
-                PetDAO petDAO = new PetDAO();
-                Optional<UserPet> currentPetOpt = petDAO.getCurrentUserPet(Long.valueOf(usuarioId));
-
-                if (currentPetOpt.isPresent()) {
-                    UserPet currentPet = currentPetOpt.get();
-                    if (currentPet.getState().ordinal() < tipoMascotaAlcanzado.ordinal()) {
-                        System.out.println("    -> Actualizando estado de mascota existente de " + currentPet.getState() + " a: " + tipoMascotaAlcanzado);
-                        petDAO.updatePetState(Long.valueOf(usuarioId), tipoMascotaAlcanzado);
-                    } else {
-                        System.out.println("    -> Mascota actual (" + currentPet.getState() + ") ya es de este tipo o superior.");
-                    }
-                } else {
-                    if (tipoMascotaAlcanzado == PetType.HUEVO) {
-                        System.out.println("    -> Creando nueva mascota (HUEVO) para usuario " + usuarioId);
-                        petDAO.saveNewPet(Long.valueOf(usuarioId), tipoMascotaAlcanzado);
-                    } else {
-                        System.out.println("    -> Se alcanzó umbral " + tipoMascotaAlcanzado + " pero no hay mascota base (HUEVO) aún.");
+    private void procesarRegistroCumplimiento(HttpServletRequest request, HttpServletResponse response, Integer usuarioId) throws IOException {
+        String habitoIdStr = request.getParameter("habitoId");
+        String notas = request.getParameter("notas");  // ✅ CORREGIDO: Usar "notas" en vez de "observacion"
+        String vecesRealizadoStr = request.getParameter("vecesRealizado");  // ✅ NUEVO
+        String estadoAnimo = request.getParameter("estadoAnimo");  // ✅ NUEVO: Estado de ánimo
+        String fechaStr = request.getParameter("fecha");
+        String estado = request.getParameter("estado"); // CUMPLIDO, NO_CUMPLIDO, PARCIAL
+        
+        LocalDate fecha = (fechaStr != null && !fechaStr.isEmpty()) 
+            ? LocalDate.parse(fechaStr) 
+            : LocalDate.now();
+        
+        if (habitoIdStr != null) {
+            Integer habitoId = Integer.parseInt(habitoIdStr);
+            Habito habito = habitoServicio.buscarHabito(habitoId);
+            
+            if (habito != null) {
+                // ✅ Parsear veces_realizado
+                Integer vecesRealizado = 1; // Default
+                if (vecesRealizadoStr != null && !vecesRealizadoStr.isEmpty()) {
+                    try {
+                        vecesRealizado = Integer.parseInt(vecesRealizadoStr);
+                    } catch (NumberFormatException e) {
+                        vecesRealizado = 1;
                     }
                 }
+                
+                // Crear el registro con el estado correspondiente
+                RegistroHabito registro = new RegistroHabito();
+                registro.setHabito(habito);
+                registro.setFecha(fecha);
+                registro.setNotas(notas);  // ✅ Cambio: setNotas en lugar de setObservacion
+                registro.setVecesRealizado(vecesRealizado);  // ✅ NUEVO: Usar el valor ingresado por el usuario
+                
+                // ✅ NUEVO: Establecer estado de ánimo
+                if (estadoAnimo != null && !estadoAnimo.isEmpty()) {
+                    registro.setEstadoAnimo(estadoAnimo);
+                } else {
+                    registro.setEstadoAnimo("neutral");  // Default
+                }
+                
+                // ✅ Determinar completado (Boolean) basado en si cumplió la meta
+                Integer metaDiaria = obtenerMetaDiariaOPredeterminada(habito);
+                if ("CUMPLIDO".equals(estado) || vecesRealizado >= metaDiaria) {
+                    registro.setCompletado(true);  // ✅ Boolean true
+                } else {
+                    registro.setCompletado(false);  // ✅ Boolean false
+                }
+                
+                System.out.println("📝 Registro creado:");
+                System.out.println("   - Hábito: " + habito.getNombre());
+                System.out.println("   - Fecha: " + fecha);
+                System.out.println("   - Veces realizado: " + vecesRealizado);
+                System.out.println("   - Meta diaria: " + metaDiaria);
+                System.out.println("   - Completado: " + registro.getCompletado());
+                System.out.println("   - Estado de ánimo: " + estadoAnimo);  // ✅ NUEVO log
+                
+                // Guardar el registro
+                RegistroHabito registroGuardado = habitoServicio.getHabitoDAO().saveRegistro(registro);
+                
+                if (registroGuardado != null) {
+                    // ✅ AGREGAR PUNTOS AL USUARIO según el estado
+                    System.out.println("🎮 Agregando puntos al usuario " + usuarioId + " por estado: " + estado);
+                    pointsService.addPointsToUser(usuarioId, estado);
+                    
+                    response.sendRedirect("controlador-habitos?action=view&usuarioId=" + usuarioId + "&success=true");
+                } else {
+                    response.sendRedirect("controlador-habitos?action=list&usuarioId=" + usuarioId + "&error=register");
+                }
             } else {
-                System.out.println("🐾 No se alcanzó un nuevo umbral de mascota según PetUnlockService.");
+                response.sendRedirect("controlador-habitos?action=list&usuarioId=" + usuarioId + "&error=notfound");
             }
-
-        } catch (Exception e) {
-            System.err.println("❌ Error al ejecutar la lógica de PetUnlockService/PetDAO: " + e.getMessage());
-            e.printStackTrace();
-            // Considera loggear este error, pero continuar con la redirección de éxito
         }
-        // --- FIN TAREA 8 ---
-
-        // Redirección de éxito final
-        response.sendRedirect("controlador-habitos?action=view&usuarioId=" + usuarioId + "&success=true");
-        return; // Salir del método
-
-    } else { // Falló al guardar/actualizar el registro
-        System.err.println("❌ Error: registroGuardado fue null o no tiene ID después de intentar guardar/actualizar.");
-        response.sendRedirect("controlador-habitos?action=list&usuarioId=" + usuarioId + "&error=register_save_failed");
-        return;
     }
-}
-
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
@@ -602,7 +441,7 @@ private void procesarRegistroCumplimiento(HttpServletRequest request, HttpServle
         try {
             if ("registrar".equals(action)) {
                 // Procesar registro de hábito cumplido
-                procesarRegistroCumplimiento(request, response, usuarioId);
+                procesarRegistroHabito(request, response, usuarioId);
                 
             } else if ("crear-con-objetivo".equals(action)) {
                 // Crear hábito asociado a un objetivo

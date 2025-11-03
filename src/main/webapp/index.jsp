@@ -12,6 +12,10 @@
     String nombreUsuario = (String) currentSession.getAttribute("nombre");
     String correoUsuario = (String) currentSession.getAttribute("correo");
     
+    // Obtener puntos del usuario
+    com.sistema_seguimiento.model.Usuario usuario = (com.sistema_seguimiento.model.Usuario) currentSession.getAttribute("usuario");
+    int puntosUsuario = (usuario != null && usuario.getPuntos() != null) ? usuario.getPuntos() : 0;
+    
     // Verificar si debe mostrar la frase diaria
     Boolean mostrarFrase = (Boolean) currentSession.getAttribute("mostrarFraseDiaria");
     String fraseDiaria = (String) currentSession.getAttribute("fraseDiaria");
@@ -40,6 +44,8 @@
         .user-details .welcome { font-size: 12px; opacity: 0.8; }
         .user-details .username { font-size: 16px; font-weight: 600; margin-top: 2px; }
         .user-details .email { font-size: 11px; opacity: 0.7; margin-top: 2px; }
+        .user-points { background: rgba(255,255,255,0.8); padding: 8px 16px; border-radius: 10px; display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 18px; }
+        .user-points .points-icon { font-size: 24px; }
         .btn-logout { background: rgba(255,255,255,0.6); color: #555; padding: 8px 16px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; text-decoration: none; display: inline-block; }
         .btn-logout:hover { background: white; transform: translateY(-2px); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
@@ -52,6 +58,7 @@
         .card-planificar .card-icon { background: #FFD6A5; }
         .card-habito .card-icon { background: #F3E8FF; }
         .card-seguimiento .card-icon { background: #FFB6B9; }
+        .card-mascotas .card-icon { background: #FFE5B4; }
         .card-title { font-family: 'Poppins', sans-serif; font-size: 20px; font-weight: 600; margin-bottom: 8px; color: #555; }
         .card-description { font-size: 14px; color: #888; line-height: 1.6; }
         .section-title { font-family: 'Poppins', sans-serif; font-size: 24px; font-weight: 600; color: #555; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px; }
@@ -96,6 +103,10 @@
                     <div class="username"><%= nombreUsuario != null ? nombreUsuario : "Usuario" %></div>
                     <div class="email"><%= correoUsuario %></div>
                 </div>
+                <div class="user-points">
+                    <span class="points-icon">🎮</span>
+                    <span><%= puntosUsuario %> pts</span>
+                </div>
                 <a href="${pageContext.request.contextPath}/logout" class="btn-logout">🚪 Salir</a>
             </div>
         </div>
@@ -134,10 +145,16 @@
             </a>
         </div>
         
-        <div class="section-title" style="margin-top: 2rem;">💭 Inspiración y Motivación</div>
+        <div class="section-title" style="margin-top: 2rem;">🎮 Gamificación</div>
         <div class="section-divider"></div>
         
         <div class="dashboard-grid">
+            <a href="${pageContext.request.contextPath}/mascotas-virtuales" class="dashboard-card card-mascotas">
+                <div class="card-icon">🐣</div>
+                <div class="card-title">Mascotas Virtuales</div>
+                <div class="card-description">Cuida y evoluciona tu mascota virtual completando hábitos. Desbloquea nuevas etapas y alcanza la mascota legendaria.</div>
+            </a>
+            
             <a href="${pageContext.request.contextPath}/frases-motivacion" class="dashboard-card card-objetivo">
                 <div class="card-icon">✨</div>
                 <div class="card-title">Frases Motivacionales</div>
