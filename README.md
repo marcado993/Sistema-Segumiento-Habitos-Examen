@@ -4,6 +4,8 @@
 
 Plataforma web diseñada para fomentar la creación de hábitos positivos y combatir la procrastinación. Permite a los usuarios definir hábitos en distintos ámbitos (personal, académico, deportivo, etc.), asignar tareas asociadas y registrar su cumplimiento. El sistema ofrece visualización del progreso para incentivar la constancia y la disciplina.
 
+**Integración Continua**: Jenkins CI/CD configurado para build y test automáticos.
+
 ## 🎯 Características Principales
 
 - **Gestión de Hábitos**: Registro y seguimiento de hábitos diarios en múltiples categorías
