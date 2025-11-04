@@ -5,7 +5,7 @@ import com.sistema_seguimiento.model.MoodEntry;
 
 /**
  * Servicio de Estado de Animo - Logica de negocio (TDD Green Phase)
- * Maneja la logica de negocio relacionada con los registros de estado de animo
+ * @author Marco Antonio Castro - Nov 2025
  * 
  * Funcionalidades:
  * - checkDailyMoodRecord(): Verifica si el usuario registro su estado hoy

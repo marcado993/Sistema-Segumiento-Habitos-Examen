@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test Parametrizado para MoodService (TDD Red Phase)
- * Verifica la lógica de negocio para actualizar una entrada de estado de ánimo basándose en su fecha
+ * @author Marco Antonio Castro - Nov 2025
  * 
  * Regla de negocio: Solo se permiten actualizaciones en entradas del día actual.
  */

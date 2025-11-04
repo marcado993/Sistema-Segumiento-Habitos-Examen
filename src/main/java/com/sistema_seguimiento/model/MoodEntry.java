@@ -4,8 +4,8 @@ import java.time.LocalDate;
 
 /**
  * Modelo MoodEntry - Entrada de estado de animo del usuario (TDD Green Phase)
- * Representa una entrada de estado de animo diaria del usuario
- * con validacion de fecha para permitir actualizaciones solo en entradas del dia actual
+ * Representa una entrada de estado de animo diaria del usuario con validacion de fecha
+ * @author Marco Antonio Castro - Nov 2025
  * 
  * Funcionalidad clave:
  * - isFromToday(): Determina si la entrada corresponde a la fecha actual

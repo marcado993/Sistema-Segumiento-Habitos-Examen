@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test unitario para modelo MoodEntry (TDD Red Phase)
- * Valida la logica del metodo isFromToday() que determina si una entrada corresponde a la fecha actual
+ * @author Marco Antonio Castro - Nov 2025
  */
 @DisplayName("Tests Modelo MoodEntry")
 class MoodEntryTest {
