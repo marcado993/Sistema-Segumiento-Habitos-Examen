@@ -80,15 +80,19 @@ class MoodServiceTest {
     }
     
     @Test
-    @DisplayName("Debe manejar userId null sin lanzar excepcion")
-    void testCheckDailyMoodRecord_WhenUserIdIsNull_ShouldHandleGracefully() {
+    @DisplayName("Debe lanzar excepcion cuando userId es null")
+    void testCheckDailyMoodRecord_WhenUserIdIsNull_ShouldThrowException() {
         // ARRANGE: Preparar caso de userId invalido
         Integer userId = null;
-        logger.info("[TEST] Validando manejo de userId null");
+        logger.info("[TEST] Validando que se lance excepcion con userId null");
         
-        // ACT & ASSERT: Ejecutar sin esperar excepcion
-        assertDoesNotThrow(() -> moodService.checkDailyMoodRecord(userId));
-        logger.info("[TEST] Metodo ejecutado sin lanzar excepcion");
+        // ACT & ASSERT: Ejecutar esperando IllegalArgumentException
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, 
+            () -> moodService.checkDailyMoodRecord(userId));
+        
+        // ASSERT: Verificar mensaje de excepcion
+        assertEquals("User ID cannot be null", exception.getMessage());
+        logger.info("[TEST] PASSED - Excepcion lanzada correctamente: " + exception.getMessage());
         
         // ASSERT: Verificar que no se invocaron dependencias
         verify(moodDAO, never()).hasEntryForToday(any());
