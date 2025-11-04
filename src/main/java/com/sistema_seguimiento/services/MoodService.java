@@ -31,17 +31,39 @@ public class MoodService {
      * @param userId ID del usuario a verificar
      */
     public void checkDailyMoodRecord(Integer userId) {
-        // 🟢 Validar userId null
-        if (userId == null) {
-            return;
-        }
+        // ====== REFACTORIZACIÓN: EXTRACT METHOD ======
         
-        // 🟢 Verificar si existe registro de hoy
+        // ===== CÓDIGO ANTES (sin Extract Method) =====
+        // if (userId == null) {
+        //     return;
+        // }
+        // boolean hasEntry = moodDAO.hasEntryForToday(userId);
+        // if (!hasEntry) {
+        //     notificationService.sendMoodReminderNotification(userId);
+        // }
+        // ==============================================
+        
+        // ===== CÓDIGO DESPUÉS (con Extract Method) =====
+        validateUserId(userId);  // ← EXTRACT METHOD aplicado aquí
+        
         boolean hasEntry = moodDAO.hasEntryForToday(userId);
         
-        // 🟢 Si NO hay registro, enviar notificación
         if (!hasEntry) {
             notificationService.sendMoodReminderNotification(userId);
+        }
+        // ================================================
+    }
+    
+    /**
+     * Valida que el ID de usuario no sea null
+     * MÉTODO EXTRAÍDO mediante técnica Extract Method
+     * 
+     * @param userId ID a validar
+     * @throws IllegalArgumentException si userId es null
+     */
+    private void validateUserId(Integer userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID cannot be null");
         }
     }
     
