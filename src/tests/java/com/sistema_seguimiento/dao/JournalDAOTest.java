@@ -58,7 +58,7 @@ public class JournalDAOTest {
 
     @Test
     @Order(2)
-    void getJournalEntriesByUser_returnsEntriesSortedByNewestFirst() {
+    void getJournalEnztriesByUser_returnsEntriesSortedByNewestFirst() {
         // Arrange: sembrar datos en H2 manualmente
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();

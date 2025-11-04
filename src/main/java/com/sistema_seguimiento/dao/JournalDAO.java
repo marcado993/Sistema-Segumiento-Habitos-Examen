@@ -1,7 +1,10 @@
 package com.sistema_seguimiento.dao;
 
 import com.sistema_seguimiento.model.JournalEntry;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.TypedQuery;
 import java.util.Collections;
 import java.util.List;
 
@@ -20,21 +23,44 @@ public class JournalDAO implements IJournalDAO {
     }
 
     /**
-     * Fase ROJA (TDD): implementación mínima que NO persiste ni asigna ID.
-     * El test debe fallar porque el ID seguirá siendo null y no se podrá encontrar en BD.
+     * Persiste una entrada de diario usando JPA y retorna la entidad con ID asignado
      */
     @Override
     public JournalEntry storeJournalEntry(JournalEntry entry) {
-        // stub: no persiste, solo devuelve la misma instancia
-        return entry;
+        if (entry == null) throw new IllegalArgumentException("JournalEntry no puede ser null");
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            em.persist(entry);
+            tx.commit();
+            return entry;
+        } catch (RuntimeException ex) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            throw ex;
+        } finally {
+            em.close();
+        }
     }
 
     /**
-     * Fase ROJA (TDD): stub que retorna lista vacía.
-     * El test debe fallar porque se esperan entradas y orden por fecha desc.
+     * Obtiene las entradas de un usuario ordenadas de más reciente a más antigua (createdAt DESC)
      */
     @Override
     public List<JournalEntry> getJournalEntriesByUser(Integer userId) {
-        return Collections.emptyList();
+        if (userId == null) return Collections.emptyList();
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<JournalEntry> query = em.createQuery(
+                "SELECT j FROM JournalEntry j WHERE j.userId = :userId ORDER BY j.createdAt DESC",
+                JournalEntry.class
+            );
+            query.setParameter("userId", userId);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
     }
 }
