@@ -1,54 +1,12 @@
 package com.sistema_seguimiento.dao;
 
 import com.sistema_seguimiento.model.RegistroProgreso;
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
-public class RegistroProgresoDAO {
+public class RegistroProgresoDAO extends BaseDAO{
     
-    /**
-     * Ejecuta una operación con transacción (sin retorno).
-     * Encapsula el patrón de begin/commit/rollback/close para evitar duplicación.
-     * 
-     * @param operation La operación a ejecutar con el EntityManager
-     * @param errorMessage El mensaje de error en caso de excepción
-     */
-    private void executeWithTransaction(Consumer<EntityManager> operation, String errorMessage) {
-        EntityManager em = EntityManagerUtil.getEntityManager();
-        try {
-            em.getTransaction().begin();
-            operation.accept(em);
-            em.getTransaction().commit();
-        } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
-            throw new RuntimeException(errorMessage, e);
-        } finally {
-            em.close();
-        }
-    }
-    
-    /**
-     * Ejecuta una consulta (sin transacción) con retorno.
-     * Encapsula el patrón de try-finally-close para consultas.
-     * 
-     * @param <T> El tipo de retorno de la consulta
-     * @param query La función que ejecuta la consulta
-     * @return El resultado de la consulta
-     */
-    private <T> T executeQuery(Function<EntityManager, T> query) {
-        EntityManager em = EntityManagerUtil.getEntityManager();
-        try {
-            return query.apply(em);
-        } finally {
-            em.close();
-        }
-    }
-    
+
     /**
      * Guarda un nuevo registro de progreso
      */

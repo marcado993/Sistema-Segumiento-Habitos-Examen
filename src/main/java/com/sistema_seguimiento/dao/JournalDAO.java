@@ -2,39 +2,53 @@ package com.sistema_seguimiento.dao;
 
 import com.sistema_seguimiento.model.JournalEntry;
 import jakarta.persistence.EntityManagerFactory;
-import java.util.Collections;
+import jakarta.persistence.TypedQuery;
+
 import java.util.List;
 
 /**
  * DAO para gestionar entradas de diario (Journal)
- * Desacoplado de EntityManagerUtil para permitir inyectar un EMF de pruebas.
+ * (Refactorizado con Patrón DAO Consolidado)
  * Implementa IJournalDAO para facilitar el testing con mocks.
+ * @version 2.0 - Refactor 4
  */
-public class JournalDAO implements IJournalDAO {
+public class JournalDAO extends BaseDAO implements IJournalDAO {
 
-    private final EntityManagerFactory emf;
-
-    public JournalDAO(EntityManagerFactory emf) {
-        if (emf == null) throw new IllegalArgumentException("EntityManagerFactory no puede ser null");
-        this.emf = emf;
+    public JournalDAO() {
+        super();
     }
 
+    public JournalDAO(EntityManagerFactory emf) {
+        super(emf);
+    }
+
+
     /**
-     * Fase ROJA (TDD): implementación mínima que NO persiste ni asigna ID.
-     * El test debe fallar porque el ID seguirá siendo null y no se podrá encontrar en BD.
+     * 🟢 FASE VERDE
+     * Almacena una nueva entrada de diario usando el helper 'executeWithTransaction'.
      */
     @Override
     public JournalEntry storeJournalEntry(JournalEntry entry) {
-        // stub: no persiste, solo devuelve la misma instancia
-        return entry;
+        executeWithTransaction(
+                em -> em.persist(entry),
+                "Error al guardar JournalEntry"
+        );
+        return entry; // Devuelve la entidad (ahora con ID)
     }
 
     /**
-     * Fase ROJA (TDD): stub que retorna lista vacía.
-     * El test debe fallar porque se esperan entradas y orden por fecha desc.
+     * 🟢 FASE VERDE
+     * Obtiene todas las entradas de diario de un usuario usando el helper 'executeQuery'.
      */
     @Override
     public List<JournalEntry> getJournalEntriesByUser(Integer userId) {
-        return Collections.emptyList();
+        return executeQuery(em -> {
+            TypedQuery<JournalEntry> query = em.createQuery(
+                    "SELECT j FROM JournalEntry j WHERE j.userId = :userId ORDER BY j.createdAt DESC",
+                    JournalEntry.class
+            );
+            query.setParameter("userId", userId);
+            return query.getResultList();
+        });
     }
 }

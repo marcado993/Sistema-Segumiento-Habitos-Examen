@@ -4,6 +4,7 @@ import com.sistema_seguimiento.model.MoodEntry;
 import com.sistema_seguimiento.model.Usuario;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.Persistence;
 
 import org.junit.*;
@@ -24,26 +25,36 @@ public class MoodDAOTest {
 
     @Before
     public void setUp() {
+        moodDAO = new MoodDAO(emf);
+
+        EntityManager emSetup = emf.createEntityManager();
+        EntityTransaction tx = emSetup.getTransaction();
+        try {
+            tx.begin();
+            emSetup.createQuery("DELETE FROM MoodEntry").executeUpdate();
+            emSetup.createQuery("DELETE FROM Usuario").executeUpdate();
+
+            usuarioPrueba = new Usuario("Test User", "test@user.com", "123");
+            emSetup.persist(usuarioPrueba);
+            tx.commit();
+        } catch (Exception e) {
+            if(tx.isActive()) tx.rollback();
+            throw e; // Lanza el error si el setup falla
+        } finally {
+            emSetup.close();
+        }
+
         em = emf.createEntityManager();
-        moodDAO = new MoodDAO();
-
-        em.getTransaction().begin();
-
-        em.createQuery("DELETE FROM MoodEntry").executeUpdate();
-        em.createQuery("DELETE FROM Usuario").executeUpdate();
-
-        usuarioPrueba = new Usuario("Test User", "test@user.com", "123");
-        em.persist(usuarioPrueba);
-
     }
 
     @After
     public void tearDown() {
-        // Hacemos commit o rollback de el test
-        if (em.getTransaction().isActive()) {
-            em.getTransaction().commit();
+        if (em != null && em.isOpen()) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().commit();
+            }
+            em.close();
         }
-        em.close();
     }
 
     @AfterClass
@@ -61,7 +72,7 @@ public class MoodDAOTest {
         entry.setDate(LocalDate.now());
 
         // When (Cuando)
-        moodDAO.storeMoodRecord(em, entry);
+        moodDAO.save(entry);
         // Then (Entonces)
         MoodEntry guardado = em.find(MoodEntry.class, entry.getId());
 

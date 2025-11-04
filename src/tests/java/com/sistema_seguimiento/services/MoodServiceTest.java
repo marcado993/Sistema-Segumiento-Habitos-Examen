@@ -38,10 +38,10 @@ public class MoodServiceTest {
     @BeforeEach
     void setUp() {
         logger.info("[SETUP] Inicializando MoodService con dependencias mockeadas");
-        moodService = new MoodService();
-        moodService.setMoodDAO(moodDAO);
-        moodService.setNotificationService(notificationService);
-        logger.info("[SETUP] Configuracion completada");
+
+//        Inyecta los Mocks directamente en el constructor
+        moodService = new MoodService(moodDAO, notificationService);
+        logger.info("[SETUP] Configuración completada");
     }
     
     @Test
@@ -107,8 +107,6 @@ public class MoodServiceTest {
         System.out.println("--- Ejecutando Test 6/12 (Lógica de Actualización - Falla) ---");
 
         // Given (Dado)
-        MoodService moodService = new MoodService();
-
         MoodEntry entryDeAyer = new MoodEntry();
         entryDeAyer.setDate(LocalDate.now().minusDays(1)); // Fecha de ayer
         entryDeAyer.setMood("FELIZ");
@@ -127,8 +125,6 @@ public class MoodServiceTest {
         System.out.println("--- Ejecutando Test 6/12 (Lógica de Actualización - Éxito) ---");
 
         // Given (Dado)
-        MoodService moodService = new MoodService();
-
         MoodEntry entryDeHoy = new MoodEntry();
         entryDeHoy.setDate(LocalDate.now());
         entryDeHoy.setMood("FELIZ");

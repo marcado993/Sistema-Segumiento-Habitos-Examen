@@ -17,11 +17,8 @@
         <class>com.sistema_seguimiento.model.Usuario</class>
         <class>com.sistema_seguimiento.model.TareaKanban</class>
         <class>com.sistema_seguimiento.model.Pomodoro</class>
-<<<<<<< HEAD
-        <class>com.sistema_seguimiento.model.JournalEntry</class>
-=======
         <class>com.sistema_seguimiento.model.MoodEntry</class>
->>>>>>> b83c223 (feat(mood): Implementar persistencia para MoodEntry y lógica de servicio)
+        <class>com.sistema_seguimiento.model.JournalEntry</class>
 
         <properties>
             <!-- Configuración de H2 en memoria para tests -->
@@ -37,7 +34,7 @@
             <property name="hibernate.format_sql" value="true"/>
             
             <!-- Configuración adicional -->
-            <property name="hibernate.connection.pool_size" value="1"/>
+            <property name="hibernate.connection.pool_size" value="5"/>
             <property name="hibernate.current_session_context_class" value="thread"/>
         </properties>
     </persistence-unit>
@@ -71,7 +68,7 @@
             <property name="hibernate.format_sql" value="true"/>
             
             <!-- Configuración adicional -->
-            <property name="hibernate.connection.pool_size" value="1"/>
+            <property name="hibernate.connection.pool_size" value="5"/>
             <property name="hibernate.current_session_context_class" value="thread"/>
         </properties>
     </persistence-unit>

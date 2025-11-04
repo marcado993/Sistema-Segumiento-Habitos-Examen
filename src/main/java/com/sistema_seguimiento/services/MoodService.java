@@ -22,9 +22,9 @@ import java.time.LocalDate;
  * @version 1.0 - Fase Verde TDD
  */
 public class MoodService {
-    
-    private MoodDAO moodDAO;
-    private NotificationService notificationService;
+
+    private final MoodDAO moodDAO;
+    private final NotificationService notificationService;
     
     /**
      * Verifica si el usuario ha registrado su estado de ánimo hoy
@@ -85,15 +85,7 @@ public class MoodService {
         // 🟢 Solo se permite actualizar si la entrada es de hoy
         return entry.isFromToday();
     }
-    
-    // Setters para inyección de dependencias (necesario para tests)
-    public void setMoodDAO(MoodDAO moodDAO) {
-        this.moodDAO = moodDAO;
-    }
-    
-    public void setNotificationService(NotificationService notificationService) {
-        this.notificationService = notificationService;
-    }
+
     /**
      * Lógica de T7 H02: Permite actualizar el estado de ánimo
      * solo si la entrada es del día actual
@@ -108,5 +100,10 @@ public class MoodService {
         }else {
             return false;
         }
+    }
+
+    public MoodService(MoodDAO moodDAO, NotificationService notificationService) {
+        this.moodDAO = moodDAO;
+        this.notificationService = notificationService;
     }
 }
