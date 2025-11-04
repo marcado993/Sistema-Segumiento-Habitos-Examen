@@ -14,6 +14,7 @@ Plataforma web diseñada para fomentar la creación de hábitos positivos y comb
 - **Mascotas Virtuales**: Sistema de gamificación para motivación adicional
 - **Frases Motivacionales**: Inspiración diaria para mantener la constancia
 - **Planificación de Objetivos**: Establecimiento y seguimiento de metas personales
+- **CI/CD Automático**: Build y testing con Jenkins
 
 ## 🛠️ Tecnologías Utilizadas
 
