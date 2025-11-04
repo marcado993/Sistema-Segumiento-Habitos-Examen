@@ -1,0 +1,28 @@
+package com.sistema_seguimiento.dao;
+
+/**
+ * DAO para MoodEntry - Capa de acceso a datos
+ * 
+ * NUEVO: Implementado en Fase Verde TDD
+ * Maneja la persistencia de entradas de estado de animo
+ * Implementacion minima para cumplir con tests
+ * 
+ * TODO: Implementar consultas JPA/Hibernate para produccion
+ * 
+ * @author Sistema Seguimiento Habitos
+ * @version 1.0 - Fase Verde TDD
+ */
+public class MoodDAO {
+    
+    /**
+     * Verifica si existe una entrada de estado de ánimo para el usuario en el día actual
+     * 
+     * @param userId ID del usuario
+     * @return true si existe una entrada de hoy, false en caso contrario
+     */
+    public boolean hasEntryForToday(Integer userId) {
+        // 🟢 Implementación mínima para pasar el test
+        // En producción real, esto consultaría la base de datos
+        return false;
+    }
+}

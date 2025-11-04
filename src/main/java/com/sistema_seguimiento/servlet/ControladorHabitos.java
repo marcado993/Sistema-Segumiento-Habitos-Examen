@@ -16,14 +16,36 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
- * Controlador de Hábitos según el diagrama de clases
- * Maneja las operaciones relacionadas con hábitos
+ * Controlador de Habitos - Maneja operaciones CRUD y registro de cumplimiento
+ * 
+ * MODIFICADO: Reemplazados System.out.println con emojis por java.util.logging.Logger
+ * Se implemento logging estructurado con prefijos:
+ * - [SEGUIMIENTO] - Vista de seguimiento
+ * - [REGISTRO] - Procesamiento de registros
+ * - [CUMPLIMIENTO] - Registro de cumplimiento con detalles
+ * - [PUNTOS] - Asignacion de puntos
+ * - [CREAR] - Creacion de habitos
+ * - [ACTUALIZAR] - Actualizacion de habitos
+ * - [FORMULARIO] - Carga de formularios
+ * 
+ * Mejora: Codigo mas profesional, mantenible y siguiendo best practices de Java
+ * 
+ * Responsabilidades:
+ * - Gestion de habitos del usuario (crear, listar, editar, eliminar)
+ * - Registro de cumplimiento diario
+ * - Calculo y asignacion de puntos
+ * - Vista de seguimiento y estadisticas
+ * 
+ * @author Sistema Seguimiento Habitos
+ * @version 2.0 - Logging Profesional
  */
 @WebServlet("/controlador-habitos")
 public class ControladorHabitos extends HttpServlet {
 
+    private static final Logger logger = Logger.getLogger(ControladorHabitos.class.getName());
     private final HabitoServicio habitoServicio = new HabitoServicio();
     private PointsService pointsService = new PointsService();
 
@@ -267,10 +289,10 @@ public class ControladorHabitos extends HttpServlet {
                 response.sendRedirect("controlador-habitos?action=list&error=notfound");
             }
         } else {
-            // Ver todos los hábitos del usuario (vista de seguimiento general)
-            System.out.println("📊 Cargando vista de seguimiento para usuario: " + usuarioId);
+            // Ver todos los habitos del usuario (vista de seguimiento general)
+            logger.info(String.format("[SEGUIMIENTO] Cargando vista para usuario ID: %d", usuarioId));
             List<Habito> habitos = habitoServicio.listarHabitosUsuario(usuarioId);
-            System.out.println("📋 Hábitos encontrados: " + habitos.size());
+            logger.info(String.format("[SEGUIMIENTO] Habitos encontrados: %d", habitos.size()));
             request.setAttribute("habitos", habitos);
             request.getRequestDispatcher("/WEB-INF/views/vistaSeguimiento.jsp").forward(request, response);
         }
@@ -283,38 +305,35 @@ public class ControladorHabitos extends HttpServlet {
         String habitoIdStr = request.getParameter("habitoId");
         String fechaStr = request.getParameter("fecha");
         String estadoStr = request.getParameter("estado");
-        String notas = request.getParameter("notas");  // ✅ CORREGIDO: Usar "notas" en vez de "observacion"
+        String notas = request.getParameter("notas");
         
-        System.out.println("📝 Procesando registro de hábito:");
-        System.out.println("   - Hábito ID: " + habitoIdStr);
-        System.out.println("   - Fecha: " + fechaStr);
-        System.out.println("   - Estado: " + estadoStr);
+        logger.info(String.format("[REGISTRO] Procesando habito ID=%s, fecha=%s, estado=%s", 
+            habitoIdStr, fechaStr, estadoStr));
         
         if (habitoIdStr != null && !habitoIdStr.isEmpty()) {
             try {
                 Integer habitoId = Integer.parseInt(habitoIdStr);
                 LocalDate fecha = fechaStr != null ? LocalDate.parse(fechaStr) : LocalDate.now();
                 
-                Habito habito = habitoServicio.registrarCumplimiento(habitoId, fecha, notas);  // ✅ CORREGIDO
+                Habito habito = habitoServicio.registrarCumplimiento(habitoId, fecha, notas);
                 
                 if (habito != null) {
-                    System.out.println("✅ Registro exitoso del hábito ID: " + habitoId);
+                    logger.info(String.format("[REGISTRO] Exitoso - Habito ID: %d", habitoId));
                     
-                    // Agregar puntos al usuario según el estado del hábito
+                    // Agregar puntos al usuario segun el estado del habito
                     pointsService.addPointsToUser(usuarioId, estadoStr);
                     
                     response.sendRedirect("controlador-habitos?action=view&usuarioId=" + usuarioId + "&success=true");
                 } else {
-                    System.out.println("❌ Error al registrar hábito");
+                    logger.warning(String.format("[REGISTRO] Error al registrar habito ID: %d", habitoId));
                     response.sendRedirect("controlador-habitos?action=registrar&usuarioId=" + usuarioId + "&error=save");
                 }
             } catch (Exception e) {
-                System.err.println("❌ Error al procesar registro: " + e.getMessage());
-                e.printStackTrace();
+                logger.severe(String.format("[REGISTRO] Excepcion: %s", e.getMessage()));
                 response.sendRedirect("controlador-habitos?action=registrar&usuarioId=" + usuarioId + "&error=exception");
             }
         } else {
-            System.out.println("❌ No se proporcionó habitoId");
+            logger.warning("[REGISTRO] HabitoId no proporcionado");
             response.sendRedirect("controlador-habitos?action=registrar&usuarioId=" + usuarioId + "&error=missing");
         }
     }    /**
@@ -365,8 +384,8 @@ public class ControladorHabitos extends HttpServlet {
             Habito habito = habitoServicio.buscarHabito(habitoId);
             
             if (habito != null) {
-                // ✅ Parsear veces_realizado
-                Integer vecesRealizado = 1; // Default
+                // Parsear veces realizado
+                Integer vecesRealizado = 1;
                 if (vecesRealizadoStr != null && !vecesRealizadoStr.isEmpty()) {
                     try {
                         vecesRealizado = Integer.parseInt(vecesRealizadoStr);
@@ -379,38 +398,33 @@ public class ControladorHabitos extends HttpServlet {
                 RegistroHabito registro = new RegistroHabito();
                 registro.setHabito(habito);
                 registro.setFecha(fecha);
-                registro.setNotas(notas);  // ✅ Cambio: setNotas en lugar de setObservacion
-                registro.setVecesRealizado(vecesRealizado);  // ✅ NUEVO: Usar el valor ingresado por el usuario
+                registro.setNotas(notas);
+                registro.setVecesRealizado(vecesRealizado);
                 
-                // ✅ NUEVO: Establecer estado de ánimo
+                // Establecer estado de animo
                 if (estadoAnimo != null && !estadoAnimo.isEmpty()) {
                     registro.setEstadoAnimo(estadoAnimo);
                 } else {
-                    registro.setEstadoAnimo("neutral");  // Default
+                    registro.setEstadoAnimo("neutral");
                 }
                 
-                // ✅ Determinar completado (Boolean) basado en si cumplió la meta
+                // Determinar completado basado en si cumplio la meta
                 Integer metaDiaria = obtenerMetaDiariaOPredeterminada(habito);
                 if ("CUMPLIDO".equals(estado) || vecesRealizado >= metaDiaria) {
-                    registro.setCompletado(true);  // ✅ Boolean true
+                    registro.setCompletado(true);
                 } else {
-                    registro.setCompletado(false);  // ✅ Boolean false
+                    registro.setCompletado(false);
                 }
                 
-                System.out.println("📝 Registro creado:");
-                System.out.println("   - Hábito: " + habito.getNombre());
-                System.out.println("   - Fecha: " + fecha);
-                System.out.println("   - Veces realizado: " + vecesRealizado);
-                System.out.println("   - Meta diaria: " + metaDiaria);
-                System.out.println("   - Completado: " + registro.getCompletado());
-                System.out.println("   - Estado de ánimo: " + estadoAnimo);  // ✅ NUEVO log
+                logger.info(String.format("[CUMPLIMIENTO] Habito: %s | Fecha: %s | Veces: %d | Meta: %d | Completado: %b | Estado animo: %s", 
+                    habito.getNombre(), fecha, vecesRealizado, metaDiaria, registro.getCompletado(), estadoAnimo));
                 
                 // Guardar el registro
                 RegistroHabito registroGuardado = habitoServicio.getHabitoDAO().saveRegistro(registro);
                 
                 if (registroGuardado != null) {
-                    // ✅ AGREGAR PUNTOS AL USUARIO según el estado
-                    System.out.println("🎮 Agregando puntos al usuario " + usuarioId + " por estado: " + estado);
+                    // Agregar puntos al usuario segun el estado
+                    logger.info(String.format("[PUNTOS] Agregando puntos a usuario %d por estado: %s", usuarioId, estado));
                     pointsService.addPointsToUser(usuarioId, estado);
                     
                     response.sendRedirect("controlador-habitos?action=view&usuarioId=" + usuarioId + "&success=true");
@@ -449,16 +463,10 @@ public class ControladorHabitos extends HttpServlet {
                 String descripcion = request.getParameter("descripcion");
                 String frecuenciaStr = request.getParameter("frecuencia");
                 String metaDiariaStr = request.getParameter("metaDiaria");
-                String objetivoIdStr = request.getParameter("objetivoId");
                 String fechaInicioStr = request.getParameter("fechaInicio");
                 
-                System.out.println("🎯 Creando hábito con objetivo:");
-                System.out.println("   - Nombre: " + nombre);
-                System.out.println("   - Descripción: " + descripcion);
-                System.out.println("   - Frecuencia: " + frecuenciaStr);
-                System.out.println("   - Meta Diaria: " + metaDiariaStr);
-                System.out.println("   - Fecha Inicio: " + fechaInicioStr);
-                System.out.println("   - Usuario ID: " + usuarioId);
+                logger.info(String.format("[CREAR] Habito con objetivo - Nombre: %s | Usuario: %d | Frecuencia: %s | Meta: %s", 
+                    nombre, usuarioId, frecuenciaStr, metaDiariaStr));
                 
                 try {
                     Habito habito = new Habito();
@@ -466,8 +474,6 @@ public class ControladorHabitos extends HttpServlet {
                     habito.setDescripcion(descripcion);
                     habito.setUsuarioId(usuarioId);
                     habito.setActivo(true);
-                    
-                    // ✅ Estado de ánimo con valor por defecto (no se pide en el formulario)
                     habito.setEstadoAnimo("neutral");
                     
                     if (frecuenciaStr != null && !frecuenciaStr.isEmpty()) {
@@ -491,18 +497,17 @@ public class ControladorHabitos extends HttpServlet {
                     Habito habitoGuardado = habitoServicio.guardarHabito(habito);
                     
                     if (habitoGuardado != null && habitoGuardado.getId() != null) {
-                        System.out.println("✅ Hábito guardado exitosamente con ID: " + habitoGuardado.getId());
-                        request.getSession().setAttribute("mensaje", "✅ Hábito '" + nombre + "' creado exitosamente");
+                        logger.info(String.format("[CREAR] Habito guardado exitosamente con ID: %d", habitoGuardado.getId()));
+                        request.getSession().setAttribute("mensaje", "Habito '" + nombre + "' creado exitosamente");
                         response.sendRedirect(request.getContextPath() + "/controlador-objetivos?action=listar");
                     } else {
-                        System.err.println("❌ Error: habitoGuardado es null o no tiene ID");
-                        request.getSession().setAttribute("error", "❌ Error al guardar el hábito. Intenta nuevamente.");
+                        logger.warning("[CREAR] Error: habitoGuardado es null o no tiene ID");
+                        request.getSession().setAttribute("error", "Error al guardar el habito. Intenta nuevamente.");
                         response.sendRedirect(request.getContextPath() + "/planificar");
                     }
                 } catch (Exception e) {
-                    System.err.println("❌ Excepción al crear hábito: " + e.getMessage());
-                    e.printStackTrace();
-                    request.getSession().setAttribute("error", "❌ Error: " + e.getMessage());
+                    logger.severe(String.format("[CREAR] Excepcion al crear habito: %s", e.getMessage()));
+                    request.getSession().setAttribute("error", "Error: " + e.getMessage());
                     response.sendRedirect(request.getContextPath() + "/planificar");
                 }
                 
@@ -537,9 +542,11 @@ public class ControladorHabitos extends HttpServlet {
                         Habito habitoGuardado = habitoServicio.guardarHabito(habito);
                         
                         if (habitoGuardado != null) {
-                            request.getSession().setAttribute("mensaje", "✅ Hábito actualizado exitosamente");
+                            logger.info(String.format("[ACTUALIZAR] Habito ID %d actualizado exitosamente", habitoId));
+                            request.getSession().setAttribute("mensaje", "Habito actualizado exitosamente");
                             response.sendRedirect("controlador-habitos?action=view&usuarioId=" + usuarioId);
                         } else {
+                            logger.warning(String.format("[ACTUALIZAR] Error al actualizar habito ID: %d", habitoId));
                             response.sendRedirect("controlador-habitos?action=view&usuarioId=" + usuarioId + "&error=save");
                         }
                     } else {
@@ -605,14 +612,14 @@ public class ControladorHabitos extends HttpServlet {
     }
     
     /**
-     * Mostrar formulario para registrar hábito diario
+     * Mostrar formulario para registrar habito diario
      */
     private void mostrarFormularioRegistro(HttpServletRequest request, HttpServletResponse response, Integer usuarioId) throws ServletException, IOException {
-        System.out.println("📝 Mostrando formulario de registro de hábitos para usuario: " + usuarioId);
+        logger.info(String.format("[FORMULARIO] Mostrando registro de habitos para usuario ID: %d", usuarioId));
         
-        // Obtener todos los hábitos del usuario para que pueda seleccionar cuál registrar
+        // Obtener todos los habitos del usuario para que pueda seleccionar cual registrar
         List<Habito> habitos = habitoServicio.listarHabitosUsuario(usuarioId);
-        System.out.println("📋 Hábitos encontrados para registro: " + habitos.size());
+        logger.info(String.format("[FORMULARIO] Habitos disponibles para registro: %d", habitos.size()));
         
         request.setAttribute("habitos", habitos);
         request.getRequestDispatcher("/WEB-INF/views/registroHabito.jsp").forward(request, response);
