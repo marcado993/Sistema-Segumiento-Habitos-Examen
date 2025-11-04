@@ -16,19 +16,8 @@ import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test de integracion para MoodService usando Mocks - Fase Verde TDD
- * 
- * MODIFICADO: Eliminados emojis, agregado logging profesional con java.util.logging
- * Se implemento patron AAA (Arrange-Act-Assert) con comentarios limpios
- * Logging estructurado con prefijos [TEST], [SETUP] para debugging
- * 
- * Valida la interaccion entre MoodService y sus dependencias
- * (MoodDAO y NotificationService) mediante objetos simulados.
- * 
- * Objetivo: Verificar logica de negocio sin dependencias de BD real.
- * 
- * @author Sistema Seguimiento Habitos
- * @version 1.0 - Fase Verde TDD
+ * Test de integracion para MoodService usando Mocks (TDD Red Phase)
+ * Valida la interaccion entre MoodService y sus dependencias (MoodDAO y NotificationService)
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Tests MoodService con Mocks")

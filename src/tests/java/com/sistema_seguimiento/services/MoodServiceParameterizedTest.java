@@ -14,19 +14,10 @@ import java.util.logging.Logger;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test Parametrizado para MoodService - Fase Verde TDD
- * 
- * MODIFICADO: Eliminados emojis, agregado logging profesional con java.util.logging
- * Se implementaron pruebas parametrizadas con @ParameterizedTest y @MethodSource
- * Logging detallado con formato estructurado para cada caso de prueba
- * 
- * Verifica la lógica de negocio para determinar si se permite
- * actualizar una entrada de estado de ánimo basándose en su fecha.
+ * Test Parametrizado para MoodService (TDD Red Phase)
+ * Verifica la lógica de negocio para actualizar una entrada de estado de ánimo basándose en su fecha
  * 
  * Regla de negocio: Solo se permiten actualizaciones en entradas del día actual.
- * 
- * @author Sistema Seguimiento Habitos
- * @version 1.0 - Fase Verde TDD
  */
 @DisplayName("Tests Parametrizados: MoodService.isUpdateAllowed()")
 class MoodServiceParameterizedTest {

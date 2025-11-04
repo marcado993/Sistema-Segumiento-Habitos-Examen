@@ -1,12 +1,9 @@
 package com.sistema_seguimiento.dao;
 
 /**
- * DAO para MoodEntry - Capa de acceso a datos
- * 
- * NUEVO: Implementado en Fase Verde TDD
+ * DAO para MoodEntry - Capa de acceso a datos (TDD Green Phase)
  * Maneja la persistencia de entradas de estado de animo
  * Implementacion minima para cumplir con tests
- * 
  * TODO: Implementar consultas JPA/Hibernate para produccion
  * 
  * @author Sistema Seguimiento Habitos

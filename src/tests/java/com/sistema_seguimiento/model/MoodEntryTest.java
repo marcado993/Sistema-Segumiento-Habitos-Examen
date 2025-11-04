@@ -8,10 +8,8 @@ import java.util.logging.Logger;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test unitario para modelo MoodEntry
- * 
- * Valida la logica del metodo isFromToday() que determina
- * si una entrada de estado de animo corresponde a la fecha actual.
+ * Test unitario para modelo MoodEntry (TDD Red Phase)
+ * Valida la logica del metodo isFromToday() que determina si una entrada corresponde a la fecha actual
  */
 @DisplayName("Tests Modelo MoodEntry")
 class MoodEntryTest {

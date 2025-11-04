@@ -4,9 +4,7 @@ import com.sistema_seguimiento.dao.MoodDAO;
 import com.sistema_seguimiento.model.MoodEntry;
 
 /**
- * Servicio de Estado de Animo - Logica de negocio
- * 
- * NUEVO: Implementado en Fase Verde TDD
+ * Servicio de Estado de Animo - Logica de negocio (TDD Green Phase)
  * Maneja la logica de negocio relacionada con los registros de estado de animo
  * 
  * Funcionalidades:
