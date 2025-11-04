@@ -28,4 +28,18 @@ public interface IJournalService {
      * @return Lista de entradas ordenadas por fecha (DESC)
      */
     List<JournalEntry> getJournalEntriesByUser(Integer userId);
+    
+    /**
+     * 🟢 FASE VERDE - Valida que una entrada de texto no esté vacía (T5 HU01)
+     * 
+     * Validaciones:
+     * - Rechaza null (retorna false)
+     * - Rechaza string vacío "" (retorna false)
+     * - Rechaza string con solo espacios " " (retorna false)
+     * - Acepta texto válido "Resumen válido" (retorna true)
+     * 
+     * @param texto Texto a validar
+     * @return true si el texto es válido (no vacío), false si es inválido
+     */
+    boolean validarEntrada(String texto);
 }

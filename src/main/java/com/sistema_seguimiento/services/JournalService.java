@@ -63,4 +63,32 @@ public class JournalService implements IJournalService {
         // 🔴 STUB: Delega al DAO sin lógica adicional
         return journalDAO.getJournalEntriesByUser(userId);
     }
+    
+    /**
+     * 🟢 FASE VERDE - Valida que una entrada no esté vacía (T5 HU01)
+     * 
+     * Implementación de validación parametrizada:
+     * - null → false (inválido)
+     * - "" → false (inválido)
+     * - " " → false (inválido, solo espacios)
+     * - "Resumen válido" → true (válido)
+     * 
+     * @param texto Texto a validar
+     * @return true si el texto es válido (no vacío y no solo espacios), false en caso contrario
+     */
+    @Override
+    public boolean validarEntrada(String texto) {
+        // Validación 1: null es inválido
+        if (texto == null) {
+            return false;
+        }
+        
+        // Validación 2: vacío o solo espacios es inválido
+        if (texto.trim().isEmpty()) {
+            return false;
+        }
+        
+        // Validación 3: si pasa las validaciones, es válido
+        return true;
+    }
 }
