@@ -2,11 +2,13 @@ package com.sistema_seguimiento.servlet;
 
 import com.sistema_seguimiento.dao.IJournalDAO;
 import com.sistema_seguimiento.model.JournalEntry;
+import com.sistema_seguimiento.services.IJournalService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -16,15 +18,43 @@ import java.util.List;
 public class JournalController extends HttpServlet {
 
     private IJournalDAO journalDAO;
+    private IJournalService journalService;
 
     // Setter para inyección en pruebas
     public void setJournalDAO(IJournalDAO journalDAO) {
         this.journalDAO = journalDAO;
     }
+    
+    // Setter para inyección del servicio en pruebas
+    public void setJournalService(IJournalService journalService) {
+        this.journalService = journalService;
+    }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // Fase ROJA (TDD): implementación vacía a propósito
+        // 🟢 FASE VERDE - Implementación para Mock 1/2 (T2, T5, T8)
+        
+        // Extraer parámetros del request
+        String action = req.getParameter("action");
+        String content = req.getParameter("content");
+        
+        // Obtener userId de la sesión
+        HttpSession session = req.getSession();
+        Integer userId = (Integer) session.getAttribute("userId");
+        
+        // Validación T5: contenido no debe estar vacío
+        if (content == null || content.trim().isEmpty()) {
+            System.out.println("⚠️ [JOURNAL CONTROLLER] Contenido vacío o inválido - No se guarda entrada");
+            // No llamar al servicio si el contenido es inválido
+            return;
+        }
+        
+        // Si la acción es "save" y hay un servicio configurado, guardar la entrada
+        if ("save".equals(action) && journalService != null) {
+            System.out.println("💾 [JOURNAL CONTROLLER] Guardando entrada de diario...");
+            journalService.saveJournalEntry(userId, content);
+            System.out.println("✅ [JOURNAL CONTROLLER] Entrada guardada exitosamente");
+        }
     }
 
     /**
