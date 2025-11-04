@@ -17,7 +17,8 @@
         <class>com.sistema_seguimiento.model.Usuario</class>
         <class>com.sistema_seguimiento.model.TareaKanban</class>
         <class>com.sistema_seguimiento.model.Pomodoro</class>
-        
+        <class>com.sistema_seguimiento.model.JournalEntry</class>
+
         <properties>
             <!-- Configuración de H2 en memoria para tests -->
             <property name="jakarta.persistence.jdbc.driver" value="org.h2.Driver"/>
