@@ -9,7 +9,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test unitario para modelo MoodEntry (TDD Red Phase)
- * @author Marco Antonio Castro - Nov 2025
+ * @author Luis Guerrero
+ * @version 1.0 - Nov 2025
  */
 @DisplayName("Tests Modelo MoodEntry")
 class MoodEntryTest {

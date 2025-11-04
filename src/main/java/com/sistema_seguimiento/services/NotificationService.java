@@ -3,7 +3,8 @@ package com.sistema_seguimiento.services;
 /**
  * Servicio de Notificaciones (TDD Green Phase)
  * Maneja el envio de notificaciones recordatorias con logging
- * @author Marco Antonio Castro - Nov 2025
+ * @author Luis Guerrero
+ * @version 1.0 - Nov 2025
  * 
  * @author Sistema Seguimiento Habitos
  * @version 1.0 - Fase Verde TDD

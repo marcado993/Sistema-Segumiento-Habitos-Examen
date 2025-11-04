@@ -17,7 +17,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test de integracion para MoodService usando Mocks (TDD Red Phase)
- * @author Marco Antonio Castro - Nov 2025
+ * @author Luis Guerrero
+ * @version 1.0 - Nov 2025
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Tests MoodService con Mocks")
