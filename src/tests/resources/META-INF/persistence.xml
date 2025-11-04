@@ -17,7 +17,11 @@
         <class>com.sistema_seguimiento.model.Usuario</class>
         <class>com.sistema_seguimiento.model.TareaKanban</class>
         <class>com.sistema_seguimiento.model.Pomodoro</class>
+<<<<<<< HEAD
         <class>com.sistema_seguimiento.model.JournalEntry</class>
+=======
+        <class>com.sistema_seguimiento.model.MoodEntry</class>
+>>>>>>> b83c223 (feat(mood): Implementar persistencia para MoodEntry y lógica de servicio)
 
         <properties>
             <!-- Configuración de H2 en memoria para tests -->

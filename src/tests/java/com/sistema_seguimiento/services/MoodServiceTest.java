@@ -12,17 +12,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 import java.util.logging.Logger;
 
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Test de integracion para MoodService usando Mocks (TDD Red Phase)
- * @author Luis Guerrero
+ * @author Luis Guerrero y Jhair Zambrano
  * @version 1.0 - Nov 2025
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Tests MoodService con Mocks")
-class MoodServiceTest {
+public class MoodServiceTest {
     
     private static final Logger logger = Logger.getLogger(MoodServiceTest.class.getName());
     
@@ -99,4 +100,45 @@ class MoodServiceTest {
         verify(notificationService, never()).sendMoodReminderNotification(any());
         logger.info("[TEST] PASSED - userId null manejado correctamente sin llamadas a dependencias");
     }
+
+    @Test
+    @DisplayName("No debe actualizar una entrada de ayer")
+    public void given_EntryDeAyer_when_updateMoodSelection_then_UpdateFails() {
+        System.out.println("--- Ejecutando Test 6/12 (Lógica de Actualización - Falla) ---");
+
+        // Given (Dado)
+        MoodService moodService = new MoodService();
+
+        MoodEntry entryDeAyer = new MoodEntry();
+        entryDeAyer.setDate(LocalDate.now().minusDays(1)); // Fecha de ayer
+        entryDeAyer.setMood("FELIZ");
+
+        // When (Cuando)
+        boolean resultado = moodService.updateMoodSelection(entryDeAyer, "TRISTE");
+
+        // Then (Entonces)
+        assertFalse(resultado,"No se debe permitir actualizar una entrada de ayer");
+        assertEquals("El estado de ánimo no debió cambiar", "FELIZ", entryDeAyer.getMood());
+    }
+
+    @Test
+    @DisplayName("Debe actualizar una entrada de hoy")
+    public void given_EntryDeHoy_when_updateMoodSelection_then_UpdateSucceeds() {
+        System.out.println("--- Ejecutando Test 6/12 (Lógica de Actualización - Éxito) ---");
+
+        // Given (Dado)
+        MoodService moodService = new MoodService();
+
+        MoodEntry entryDeHoy = new MoodEntry();
+        entryDeHoy.setDate(LocalDate.now());
+        entryDeHoy.setMood("FELIZ");
+
+        // When (Cuando)
+        boolean resultado = moodService.updateMoodSelection(entryDeHoy, "TRISTE"); // <-- Fallará aquí
+
+        // Then (Entonces)
+        assertTrue(resultado, "Se debe permitir actualizar una entrada de hoy");
+        assertEquals("El estado de ánimo debió cambiar", "TRISTE", entryDeHoy.getMood());
+    }
+
 }

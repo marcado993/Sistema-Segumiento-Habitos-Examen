@@ -17,6 +17,7 @@
         <class>com.sistema_seguimiento.model.RegistroHabito</class>
         <class>com.sistema_seguimiento.model.TareaKanban</class>
         <class>com.sistema_seguimiento.model.Pomodoro</class>
+        <class>com.sistema_seguimiento.model.MoodEntry</class>
 
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
 

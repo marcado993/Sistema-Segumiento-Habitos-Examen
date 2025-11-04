@@ -21,4 +21,13 @@ public class NotificationService {
         // En producción real, esto enviaría una notificación real
         System.out.println("🔔 Notificación enviada al usuario " + userId + ": Recuerda registrar tu estado de ánimo hoy");
     }
+    /**
+     * Genera el texto para el recordatorio de estado de ánimo.
+     *
+     * @param userName el nombre del usuario a notificar
+     * @return el mensaje de recordatorio formateado.
+     */
+    public String generateReminderMessage(String userName) {
+        return "!Hola " + userName + ", no olvides registrar tu ánimo de hoy!";
+    }
 }

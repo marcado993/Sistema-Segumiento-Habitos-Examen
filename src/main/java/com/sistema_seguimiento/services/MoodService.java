@@ -3,9 +3,11 @@ package com.sistema_seguimiento.services;
 import com.sistema_seguimiento.dao.MoodDAO;
 import com.sistema_seguimiento.model.MoodEntry;
 
+import java.time.LocalDate;
+
 /**
  * Servicio de Estado de Animo - Logica de negocio (TDD Green Phase)
- * @author Luis Guerrero
+ * @author Luis Guerrero y Jhair Zambrano
  * @version 1.0 - Nov 2025
  * 
  * Funcionalidades:
@@ -91,5 +93,20 @@ public class MoodService {
     
     public void setNotificationService(NotificationService notificationService) {
         this.notificationService = notificationService;
+    }
+    /**
+     * Lógica de T7 H02: Permite actualizar el estado de ánimo
+     * solo si la entrada es del día actual
+     * @param entry el registro de ánimo a modificar
+     * @param nuevoEstadoAnimo el estado (ej. "TRISTE").
+     * @return true si la actualización fue permitida, false si no.
+     */
+    public boolean updateMoodSelection(MoodEntry entry, String nuevoEstadoAnimo) {
+        if (entry.getDate().equals(LocalDate.now())){
+            entry.setMood(nuevoEstadoAnimo);
+            return true;
+        }else {
+            return false;
+        }
     }
 }
