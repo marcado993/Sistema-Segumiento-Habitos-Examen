@@ -8,16 +8,10 @@ import java.util.logging.Logger;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test unitario para modelo MoodEntry - Fase Verde TDD
- * 
- * MODIFICADO: Eliminados emojis, agregado logging profesional con java.util.logging
- * Se implemento patron de logs estructurados con prefijos [TEST], [RESULT]
+ * Test unitario para modelo MoodEntry
  * 
  * Valida la logica del metodo isFromToday() que determina
  * si una entrada de estado de animo corresponde a la fecha actual.
- * 
- * @author Sistema Seguimiento Habitos
- * @version 1.0 - Fase Verde TDD
  */
 @DisplayName("Tests Modelo MoodEntry")
 class MoodEntryTest {
