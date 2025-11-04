@@ -8,8 +8,9 @@ import java.util.List;
 /**
  * DAO para gestionar entradas de diario (Journal)
  * Desacoplado de EntityManagerUtil para permitir inyectar un EMF de pruebas.
+ * Implementa IJournalDAO para facilitar el testing con mocks.
  */
-public class JournalDAO {
+public class JournalDAO implements IJournalDAO {
 
     private final EntityManagerFactory emf;
 
@@ -22,6 +23,7 @@ public class JournalDAO {
      * Fase ROJA (TDD): implementación mínima que NO persiste ni asigna ID.
      * El test debe fallar porque el ID seguirá siendo null y no se podrá encontrar en BD.
      */
+    @Override
     public JournalEntry storeJournalEntry(JournalEntry entry) {
         // stub: no persiste, solo devuelve la misma instancia
         return entry;
@@ -31,6 +33,7 @@ public class JournalDAO {
      * Fase ROJA (TDD): stub que retorna lista vacía.
      * El test debe fallar porque se esperan entradas y orden por fecha desc.
      */
+    @Override
     public List<JournalEntry> getJournalEntriesByUser(Integer userId) {
         return Collections.emptyList();
     }
