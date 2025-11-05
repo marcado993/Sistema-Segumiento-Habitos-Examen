@@ -2,6 +2,7 @@ package com.sistema_seguimiento.servlet;
 
 import com.sistema_seguimiento.dao.IJournalDAO;
 import com.sistema_seguimiento.model.JournalEntry;
+import com.sistema_seguimiento.model.Usuario;
 import com.sistema_seguimiento.services.IJournalService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -41,13 +42,15 @@ public class JournalController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession(false);
         
-        // Validar sesión de usuario
-        if (session == null || session.getAttribute("userId") == null) {
+        // Validar sesión de usuario - Compatibilidad con el sistema de login existente
+        if (session == null || session.getAttribute("usuario") == null) {
             resp.sendRedirect("login.jsp");
             return;
         }
         
-        Integer userId = (Integer) session.getAttribute("userId");
+        // Obtener el ID del usuario desde el objeto Usuario en sesión
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        Integer userId = usuario.getId();
         
         try {
             // Obtener historial de entradas del usuario (Escenario 3)
@@ -83,8 +86,8 @@ public class JournalController extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession(false);
         
-        // Validar sesión de usuario
-        if (session == null || session.getAttribute("userId") == null) {
+        // Validar sesión de usuario - Compatibilidad con el sistema de login existente
+        if (session == null || session.getAttribute("usuario") == null) {
             resp.sendRedirect("login.jsp");
             return;
         }
@@ -92,7 +95,10 @@ public class JournalController extends HttpServlet {
         // Extraer parámetros del request
         String action = req.getParameter("action");
         String content = req.getParameter("content");
-        Integer userId = (Integer) session.getAttribute("userId");
+        
+        // Obtener el ID del usuario desde el objeto Usuario en sesión
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        Integer userId = usuario.getId();
         
         // Escenario 2: Validación T5 - contenido no debe estar vacío
         if (content == null || content.trim().isEmpty()) {
