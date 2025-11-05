@@ -106,4 +106,9 @@ public class MoodEntry {
         }
         return this.userId; // Devuelve el temporal si 'usuario' no está cargado
     }
+
+    // Setter para 'userId' (permite seteo temporal antes de asociar Usuario)
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
 }

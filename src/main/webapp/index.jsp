@@ -171,6 +171,12 @@
                 <div class="card-title">Diario Personal</div>
                 <div class="card-description">Reflexiona sobre tu día, expresa tus emociones y logros. Un espacio personal para el autoconocimiento y crecimiento.</div>
             </a>
+            
+            <a href="${pageContext.request.contextPath}/mood-tracker" class="dashboard-card card-objetivos">
+                <div class="card-icon">😊</div>
+                <div class="card-title">Estado de Ánimo</div>
+                <div class="card-description">Registra cómo te sientes cada día. Hacer un seguimiento de tu estado emocional te ayuda a identificar patrones y mejorar tu bienestar.</div>
+            </a>
         </div>
         
         <div style="text-align: center; margin-top: 3rem; padding: 2rem; background: white; border-radius: 16px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);">
