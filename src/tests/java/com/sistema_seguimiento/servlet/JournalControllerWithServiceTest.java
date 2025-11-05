@@ -65,6 +65,7 @@ class JournalControllerWithServiceTest {
         
         // Configurar comportamiento básico de mocks
         when(request.getSession()).thenReturn(session);
+        when(request.getSession(false)).thenReturn(session); // Agregar este mock también
         
         System.out.println("✓ Mocks configurados: HttpServletRequest, HttpServletResponse, HttpSession");
         System.out.println("✓ JournalService mockeado listo para inyección");

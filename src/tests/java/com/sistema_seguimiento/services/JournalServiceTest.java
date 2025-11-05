@@ -2,8 +2,10 @@ package com.sistema_seguimiento.services;
 
 import com.sistema_seguimiento.dao.JournalDAO;
 import com.sistema_seguimiento.model.JournalEntry;
+import com.sistema_seguimiento.model.Usuario;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.Persistence;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -32,8 +34,25 @@ public class JournalServiceTest {
 
     @Test
     void saveJournalEntry_persistsEntry_via_DAO_real() {
-        // Arrange
-        Integer userId = 42;
+        // Arrange: Crear usuario primero
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        Usuario usuario = null;
+        try {
+            tx.begin();
+            usuario = new Usuario();
+            usuario.setNombre("Test User");
+            usuario.setCorreo("testservice@example.com");
+            usuario.setContrasena("password123");
+            usuario.setPuntos(0);
+            em.persist(usuario);
+            tx.commit();
+        } finally {
+            if (tx.isActive()) tx.rollback();
+            em.close();
+        }
+        
+        Integer userId = usuario.getId();
         String content = "Entrada desde servicio (T2 HU01)";
 
         // Act
@@ -47,7 +66,7 @@ public class JournalServiceTest {
         assertNotNull(saved.getCreatedAt(), "Debe asignarse createdAt");
 
         // Verificar realmente en BD (nueva sesión)
-        EntityManager em = emf.createEntityManager();
+        em = emf.createEntityManager();
         try {
             JournalEntry fromDb = em.find(JournalEntry.class, saved.getId());
             assertNotNull(fromDb, "La entrada debe existir en la BD");
