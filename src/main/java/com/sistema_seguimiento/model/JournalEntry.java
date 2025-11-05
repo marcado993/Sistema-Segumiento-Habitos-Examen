@@ -10,8 +10,12 @@ public class JournalEntry {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "user_id", nullable = false)
+    @Transient // No guardar este campo en la BD
     private Integer userId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private Usuario usuario; // Relación real con Usuario
 
     @Column(name = "content", nullable = false, length = 4000)
     private String content;
@@ -37,8 +41,21 @@ public class JournalEntry {
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 
-    public Integer getUserId() { return userId; }
-    public void setUserId(Integer userId) { this.userId = userId; }
+    public Integer getUserId() { 
+        return usuario != null ? usuario.getId() : userId;
+    }
+    
+    public void setUserId(Integer userId) { 
+        this.userId = userId; 
+    }
+
+    public Usuario getUsuario() { return usuario; }
+    public void setUsuario(Usuario usuario) { 
+        this.usuario = usuario;
+        if (usuario != null) {
+            this.userId = usuario.getId();
+        }
+    }
 
     public String getContent() { return content; }
     public void setContent(String content) { this.content = content; }

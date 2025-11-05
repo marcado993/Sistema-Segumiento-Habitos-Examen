@@ -463,8 +463,8 @@
                 <button type="submit" class="btn btn-primary">
                     <%= (existingMood != null) ? "💾 Actualizar Estado" : "💾 Guardar Estado" %>
                 </button>
-                <button type="button" class="btn btn-secondary" onclick="window.location.href='index.jsp'">
-                    🏠 Volver al Inicio
+                <button type="button" class="btn btn-secondary" onclick="window.location.href='<%= request.getContextPath() %>/index.jsp'">
+                    🏠 Volver al Dashboard
                 </button>
             </div>
         </form>

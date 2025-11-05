@@ -544,8 +544,8 @@
                     <button type="submit" class="btn-primary" id="saveBtn">
                         💾 Guardar Entrada
                     </button>
-                    <button type="button" class="btn-secondary" onclick="clearForm()">
-                        🔄 Limpiar
+                    <button type="button" class="btn-secondary" onclick="window.location.href='<%= request.getContextPath() %>/index.jsp'">
+                        🏠 Volver al Dashboard
                     </button>
                 </div>
             </form>
@@ -620,16 +620,6 @@
                 charCount.style.fontWeight = '400';
             }
         });
-        
-        // Función para limpiar el formulario
-        function clearForm() {
-            if (confirm('¿Estás seguro de que deseas limpiar el formulario?')) {
-                contentTextarea.value = '';
-                charCount.textContent = '0';
-                saveBtn.disabled = true;
-                contentTextarea.focus();
-            }
-        }
         
         // Validación antes de enviar (Escenario 2: No permitir contenido vacío)
         document.getElementById('journalForm').addEventListener('submit', function(e) {

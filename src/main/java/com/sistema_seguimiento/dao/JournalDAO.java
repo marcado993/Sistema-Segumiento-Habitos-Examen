@@ -1,6 +1,7 @@
 package com.sistema_seguimiento.dao;
 
 import com.sistema_seguimiento.model.JournalEntry;
+import com.sistema_seguimiento.model.Usuario;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.TypedQuery;
 
@@ -29,10 +30,15 @@ public class JournalDAO extends BaseDAO implements IJournalDAO {
      */
     @Override
     public JournalEntry storeJournalEntry(JournalEntry entry) {
-        executeWithTransaction(
-                em -> em.persist(entry),
-                "Error al guardar JournalEntry"
-        );
+        executeWithTransaction(em -> {
+            // Si el usuario no está asociado, lo buscamos
+            if (entry.getUsuario() == null && entry.getUserId() != null) {
+                Usuario usuario = em.find(Usuario.class, entry.getUserId());
+                entry.setUsuario(usuario);
+            }
+            em.persist(entry);
+        }, "Error al guardar JournalEntry");
+        
         return entry; // Devuelve la entidad (ahora con ID)
     }
 
@@ -44,7 +50,7 @@ public class JournalDAO extends BaseDAO implements IJournalDAO {
     public List<JournalEntry> getJournalEntriesByUser(Integer userId) {
         return executeQuery(em -> {
             TypedQuery<JournalEntry> query = em.createQuery(
-                    "SELECT j FROM JournalEntry j WHERE j.userId = :userId ORDER BY j.createdAt DESC",
+                    "SELECT j FROM JournalEntry j WHERE j.usuario.id = :userId ORDER BY j.createdAt DESC",
                     JournalEntry.class
             );
             query.setParameter("userId", userId);

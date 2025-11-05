@@ -29,13 +29,13 @@ public class MoodEntry {
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario; // Relación real con la entidad Usuario
 
-    @Column(name = "date", nullable = false) // Mantenemos nombres en inglés
+    @Column(name = "fecha", nullable = false) // 🔧 Columna real en Supabase
     private LocalDate date;
 
-    @Column(name = "mood", nullable = false) // Mantenemos nombres en inglés
+    @Column(name = "estadoanimo", nullable = false) // 🔧 Columna real en Supabase
     private String mood;
 
-    @Column(name = "notes", columnDefinition = "TEXT") // Mantenemos nombres en inglés
+    @Column(name = "notes", columnDefinition = "TEXT")
     private String notes;
 
     public MoodEntry() {

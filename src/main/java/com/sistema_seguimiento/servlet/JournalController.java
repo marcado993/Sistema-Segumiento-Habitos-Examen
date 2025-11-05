@@ -21,6 +21,16 @@ public class JournalController extends HttpServlet {
     private IJournalDAO journalDAO;
     private IJournalService journalService;
 
+    @Override
+    public void init() throws ServletException {
+        super.init();
+        // ✅ Inicializar DAO en producción
+        if (this.journalDAO == null) {
+            this.journalDAO = new com.sistema_seguimiento.dao.JournalDAO();
+            System.out.println("✅ [JOURNAL CONTROLLER] JournalDAO inicializado correctamente");
+        }
+    }
+
     // Setter para inyección en pruebas
     public void setJournalDAO(IJournalDAO journalDAO) {
         this.journalDAO = journalDAO;
@@ -143,11 +153,23 @@ public class JournalController extends HttpServlet {
     }
 
     /**
-     * Fase ROJA (TDD): lógica de guardado aún sin persistencia real.
-     * Debe construir la entrada y delegar en DAO, pero aquí solo la construimos para provocar "rojo" natural.
+     * 🟢 FASE VERDE - Guarda la entrada en la base de datos usando JournalDAO
+     * 
+     * @param userId ID del usuario
+     * @param content Contenido de la entrada
+     * @return JournalEntry guardada con su ID generado
      */
     public JournalEntry saveJournalEntry(Integer userId, String content) {
-        return new JournalEntry(userId, content, LocalDateTime.now());
+        System.out.println("💾 [JOURNAL CONTROLLER] Guardando entrada en BD...");
+        
+        // Crear la entrada
+        JournalEntry entry = new JournalEntry(userId, content, LocalDateTime.now());
+        
+        // Guardar en la base de datos usando el DAO
+        JournalEntry savedEntry = journalDAO.storeJournalEntry(entry);
+        
+        System.out.println("✅ [JOURNAL CONTROLLER] Entrada guardada con ID: " + savedEntry.getId());
+        return savedEntry;
     }
     
     /**
