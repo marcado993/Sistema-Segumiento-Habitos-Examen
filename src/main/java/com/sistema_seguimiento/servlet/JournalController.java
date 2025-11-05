@@ -29,31 +29,110 @@ public class JournalController extends HttpServlet {
     public void setJournalService(IJournalService journalService) {
         this.journalService = journalService;
     }
+    
+    /**
+     * 🟢 Maneja GET - Muestra la vista del diario con historial (Escenario 3)
+     * 
+     * Criterio de aceptación:
+     * - Dado que el usuario accede al diario
+     * - Entonces puede ver el formulario y el historial de entradas ordenadas DESC por fecha
+     */
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        HttpSession session = req.getSession(false);
+        
+        // Validar sesión de usuario
+        if (session == null || session.getAttribute("userId") == null) {
+            resp.sendRedirect("login.jsp");
+            return;
+        }
+        
+        Integer userId = (Integer) session.getAttribute("userId");
+        
+        try {
+            // Obtener historial de entradas del usuario (Escenario 3)
+            List<JournalEntry> entries = getJournalEntriesByUser(userId);
+            
+            // Pasar las entradas a la vista
+            req.setAttribute("journalEntries", entries);
+            
+            // Redirigir a la vista del diario
+            req.getRequestDispatcher("/WEB-INF/views/diarioPersonal.jsp").forward(req, resp);
+            
+        } catch (Exception e) {
+            System.err.println("❌ [JOURNAL CONTROLLER] Error al cargar entradas: " + e.getMessage());
+            req.setAttribute("errorMessage", "Error al cargar el historial de entradas.");
+            req.getRequestDispatcher("/WEB-INF/views/diarioPersonal.jsp").forward(req, resp);
+        }
+    }
 
+    /**
+     * 🟢 Maneja POST - Guarda nueva entrada del diario
+     * 
+     * Escenario 1: Usuario registra correctamente su entrada
+     * - Dado que el usuario escribe el resumen de su día
+     * - Cuando hace clic en "Guardar"
+     * - Entonces el resumen queda registrado
+     * 
+     * Escenario 2: Usuario no llena los campos
+     * - Dado que el usuario no ha escrito nada
+     * - Cuando hace clic en "Guardar"
+     * - Entonces no se registra ningún resumen
+     */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // 🟢 FASE VERDE - Implementación para Mock 1/2 (T2, T5, T8)
+        HttpSession session = req.getSession(false);
+        
+        // Validar sesión de usuario
+        if (session == null || session.getAttribute("userId") == null) {
+            resp.sendRedirect("login.jsp");
+            return;
+        }
         
         // Extraer parámetros del request
         String action = req.getParameter("action");
         String content = req.getParameter("content");
-        
-        // Obtener userId de la sesión
-        HttpSession session = req.getSession();
         Integer userId = (Integer) session.getAttribute("userId");
         
-        // Validación T5: contenido no debe estar vacío
+        // Escenario 2: Validación T5 - contenido no debe estar vacío
         if (content == null || content.trim().isEmpty()) {
             System.out.println("⚠️ [JOURNAL CONTROLLER] Contenido vacío o inválido - No se guarda entrada");
-            // No llamar al servicio si el contenido es inválido
+            
+            // Cargar entradas existentes
+            List<JournalEntry> entries = getJournalEntriesByUser(userId);
+            req.setAttribute("journalEntries", entries);
+            req.setAttribute("warningMessage", "No se puede guardar una entrada vacía. Por favor, escribe tus reflexiones.");
+            req.getRequestDispatcher("/WEB-INF/views/diarioPersonal.jsp").forward(req, resp);
             return;
         }
         
-        // Si la acción es "save" y hay un servicio configurado, guardar la entrada
-        if ("save".equals(action) && journalService != null) {
-            System.out.println("💾 [JOURNAL CONTROLLER] Guardando entrada de diario...");
-            journalService.saveJournalEntry(userId, content);
-            System.out.println("✅ [JOURNAL CONTROLLER] Entrada guardada exitosamente");
+        // Escenario 1: Guardar la entrada
+        if ("save".equals(action)) {
+            try {
+                System.out.println("💾 [JOURNAL CONTROLLER] Guardando entrada de diario...");
+                
+                if (journalService != null) {
+                    // Usar el servicio si está configurado (para tests)
+                    journalService.saveJournalEntry(userId, content);
+                } else {
+                    // Usar saveJournalEntry directamente (producción)
+                    JournalEntry newEntry = saveJournalEntry(userId, content);
+                    System.out.println("✅ [JOURNAL CONTROLLER] Entrada guardada con ID: " + newEntry.getId());
+                }
+                
+                // Redirigir con mensaje de éxito (POST-REDIRECT-GET pattern)
+                session.setAttribute("successMessage", "✅ Tu reflexión ha sido guardada exitosamente.");
+                resp.sendRedirect("journal");
+                
+            } catch (Exception e) {
+                System.err.println("❌ [JOURNAL CONTROLLER] Error al guardar entrada: " + e.getMessage());
+                
+                // Cargar entradas existentes
+                List<JournalEntry> entries = getJournalEntriesByUser(userId);
+                req.setAttribute("journalEntries", entries);
+                req.setAttribute("errorMessage", "Ocurrió un error al guardar tu entrada. Por favor, intenta nuevamente.");
+                req.getRequestDispatcher("/WEB-INF/views/diarioPersonal.jsp").forward(req, resp);
+            }
         }
     }
 
