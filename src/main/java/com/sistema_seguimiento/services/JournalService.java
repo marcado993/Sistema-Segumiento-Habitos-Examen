@@ -30,7 +30,7 @@ public class JournalService implements IJournalService {
     }
     
     /**
-     * 🔴 FASE ROJA - Guarda una nueva entrada de diario (T2, T5)
+     * � FASE VERDE - Guarda una nueva entrada de diario (T2, T5)
      * 
      * Validaciones (T5):
      * - Si el contenido es null o vacío, retorna null (no guarda)
@@ -47,9 +47,16 @@ public class JournalService implements IJournalService {
      */
     @Override
     public JournalEntry saveJournalEntry(Integer userId, String content) {
-        // 🔴 STUB: Implementación mínima que retorna null
-        // El test debe fallar porque no guarda nada
-        return null;
+        // Validación T5: contenido vacío retorna null
+        if (!validarEntrada(content)) {
+            return null;
+        }
+        
+        // Crear entrada con fecha actual (T2)
+        JournalEntry entry = new JournalEntry(userId, content, LocalDateTime.now());
+        
+        // Persistir via DAO
+        return journalDAO.storeJournalEntry(entry);
     }
     
     /**

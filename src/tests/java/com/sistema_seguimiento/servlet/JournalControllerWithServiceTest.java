@@ -1,6 +1,8 @@
 package com.sistema_seguimiento.servlet;
 
+import com.sistema_seguimiento.model.Usuario;
 import com.sistema_seguimiento.services.IJournalService;
+import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -10,6 +12,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Collections;
 
 import static org.mockito.Mockito.*;
 
@@ -58,16 +62,19 @@ class JournalControllerWithServiceTest {
     private JournalController controller;
     
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         System.out.println("=".repeat(80));
         System.out.println("� [SETUP FASE VERDE] Inicializando JournalController con JournalService mockeado");
         controller = new JournalController();
         
-        // Configurar comportamiento básico de mocks
-        when(request.getSession()).thenReturn(session);
-        when(request.getSession(false)).thenReturn(session); // Agregar este mock también
+        // Inicializar el controller (crea JournalDAO internamente)
+        controller.init();
+        
+        // Configurar comportamiento básico de mocks - solo getSession(false) es usado por doPost
+        when(request.getSession(false)).thenReturn(session);
         
         System.out.println("✓ Mocks configurados: HttpServletRequest, HttpServletResponse, HttpSession");
+        System.out.println("✓ JournalController inicializado con DAO");
         System.out.println("✓ JournalService mockeado listo para inyección");
         System.out.println("=".repeat(80));
     }
@@ -104,10 +111,16 @@ class JournalControllerWithServiceTest {
         Integer userId = 1;
         String content = "Entrada de prueba válida para el diario";
         
+        // Crear mock de Usuario
+        Usuario mockUsuario = new Usuario();
+        mockUsuario.setId(userId);
+        mockUsuario.setNombre("Test User");
+        mockUsuario.setCorreo("test@example.com");
+        
         // Configurar request mock
         when(request.getParameter("action")).thenReturn("save");
         when(request.getParameter("content")).thenReturn(content);
-        when(session.getAttribute("userId")).thenReturn(userId); // Cambio: usar "userId" directamente
+        when(session.getAttribute("usuario")).thenReturn(mockUsuario); // CORREGIDO: usar "usuario" con objeto Usuario
         
         System.out.println("✓ Usuario en sesión: ID=" + userId);
         System.out.println("✓ Parámetros del request:");
@@ -130,6 +143,9 @@ class JournalControllerWithServiceTest {
         
         // Verificar que el servicio fue llamado EXACTAMENTE 1 vez
         verify(journalService, times(1)).saveJournalEntry(userId, content);
+        
+        // Verificar que se redirigió correctamente
+        verify(response, times(1)).sendRedirect("journal");
         
         System.out.println("✅ ASSERT PASSED: journalService.saveJournalEntry() llamado 1 vez con:");
         System.out.println("   - userId: " + userId);
@@ -164,9 +180,19 @@ class JournalControllerWithServiceTest {
         Integer userId = 1;
         String contentVacio = "   "; // Espacios en blanco (inválido)
         
+        // Crear mock de Usuario
+        Usuario mockUsuario = new Usuario();
+        mockUsuario.setId(userId);
+        mockUsuario.setNombre("Test User");
+        mockUsuario.setCorreo("test@example.com");
+        
         when(request.getParameter("action")).thenReturn("save");
         when(request.getParameter("content")).thenReturn(contentVacio);
-        when(session.getAttribute("userId")).thenReturn(userId); // Cambio: usar "userId" directamente
+        when(session.getAttribute("usuario")).thenReturn(mockUsuario); // CORREGIDO: usar "usuario" con objeto Usuario
+        
+        // Mock RequestDispatcher para el forward
+        jakarta.servlet.RequestDispatcher mockDispatcher = mock(jakarta.servlet.RequestDispatcher.class);
+        when(request.getRequestDispatcher("/WEB-INF/views/diarioPersonal.jsp")).thenReturn(mockDispatcher);
         
         System.out.println("📋 Contenido vacío/inválido: '" + contentVacio + "'");
         
