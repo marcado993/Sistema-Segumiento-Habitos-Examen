@@ -1,5 +1,6 @@
 package com.sistema_seguimiento.services;
 
+import com.sistema_seguimiento.dao.MoodDAO;
 import com.sistema_seguimiento.model.MoodEntry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -25,11 +26,15 @@ class MoodServiceParameterizedTest {
     
     private static final Logger logger = Logger.getLogger(MoodServiceParameterizedTest.class.getName());
     private MoodService moodService;
-    
+    private MoodDAO moodDAO;
+    private NotificationService notificationService;
+
     @BeforeEach
     void setUp() {
         logger.info("[SETUP] Inicializando MoodService para pruebas parametrizadas");
-        moodService = new MoodService();
+//        Inyecta los Mocks directamente en el constructor
+        moodService = new MoodService(moodDAO, notificationService);
+        logger.info("[SETUP] Configuración completada");
     }
     
     /**

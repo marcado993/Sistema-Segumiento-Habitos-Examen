@@ -47,14 +47,9 @@ public class JournalService implements IJournalService {
      */
     @Override
     public JournalEntry saveJournalEntry(Integer userId, String content) {
-        // Validación (T5)
-        if (!validarEntrada(content)) {
-            return null;
-        }
-        // Construcción de la entidad (T2)
-        JournalEntry entry = new JournalEntry(userId, content, LocalDateTime.now());
-        // Delegación al DAO (persistencia)
-        return journalDAO.storeJournalEntry(entry);
+        // 🔴 STUB: Implementación mínima que retorna null
+        // El test debe fallar porque no guarda nada
+        return null;
     }
     
     /**

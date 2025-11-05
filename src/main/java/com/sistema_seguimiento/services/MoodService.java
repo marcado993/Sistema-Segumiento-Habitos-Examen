@@ -3,9 +3,11 @@ package com.sistema_seguimiento.services;
 import com.sistema_seguimiento.dao.MoodDAO;
 import com.sistema_seguimiento.model.MoodEntry;
 
+import java.time.LocalDate;
+
 /**
  * Servicio de Estado de Animo - Logica de negocio (TDD Green Phase)
- * @author Luis Guerrero
+ * @author Luis Guerrero y Jhair Zambrano
  * @version 1.0 - Nov 2025
  * 
  * Funcionalidades:
@@ -20,9 +22,9 @@ import com.sistema_seguimiento.model.MoodEntry;
  * @version 1.0 - Fase Verde TDD
  */
 public class MoodService {
-    
-    private MoodDAO moodDAO;
-    private NotificationService notificationService;
+
+    private final MoodDAO moodDAO;
+    private final NotificationService notificationService;
     
     /**
      * Verifica si el usuario ha registrado su estado de ánimo hoy
@@ -83,13 +85,25 @@ public class MoodService {
         // 🟢 Solo se permite actualizar si la entrada es de hoy
         return entry.isFromToday();
     }
-    
-    // Setters para inyección de dependencias (necesario para tests)
-    public void setMoodDAO(MoodDAO moodDAO) {
-        this.moodDAO = moodDAO;
+
+    /**
+     * Lógica de T7 H02: Permite actualizar el estado de ánimo
+     * solo si la entrada es del día actual
+     * @param entry el registro de ánimo a modificar
+     * @param nuevoEstadoAnimo el estado (ej. "TRISTE").
+     * @return true si la actualización fue permitida, false si no.
+     */
+    public boolean updateMoodSelection(MoodEntry entry, String nuevoEstadoAnimo) {
+        if (entry.getDate().equals(LocalDate.now())){
+            entry.setMood(nuevoEstadoAnimo);
+            return true;
+        }else {
+            return false;
+        }
     }
-    
-    public void setNotificationService(NotificationService notificationService) {
+
+    public MoodService(MoodDAO moodDAO, NotificationService notificationService) {
+        this.moodDAO = moodDAO;
         this.notificationService = notificationService;
     }
 }

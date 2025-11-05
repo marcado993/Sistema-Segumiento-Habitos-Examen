@@ -1,66 +1,54 @@
 package com.sistema_seguimiento.dao;
 
 import com.sistema_seguimiento.model.JournalEntry;
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.TypedQuery;
-import java.util.Collections;
+
 import java.util.List;
 
 /**
  * DAO para gestionar entradas de diario (Journal)
- * Desacoplado de EntityManagerUtil para permitir inyectar un EMF de pruebas.
+ * (Refactorizado con Patrón DAO Consolidado)
  * Implementa IJournalDAO para facilitar el testing con mocks.
+ * @version 2.0 - Refactor 4
  */
-public class JournalDAO implements IJournalDAO {
+public class JournalDAO extends BaseDAO implements IJournalDAO {
 
-    private final EntityManagerFactory emf;
-
-    public JournalDAO(EntityManagerFactory emf) {
-        if (emf == null) throw new IllegalArgumentException("EntityManagerFactory no puede ser null");
-        this.emf = emf;
+    public JournalDAO() {
+        super();
     }
 
+    public JournalDAO(EntityManagerFactory emf) {
+        super(emf);
+    }
+
+
     /**
-     * Persiste una entrada de diario usando JPA y retorna la entidad con ID asignado
+     * 🟢 FASE VERDE
+     * Almacena una nueva entrada de diario usando el helper 'executeWithTransaction'.
      */
     @Override
     public JournalEntry storeJournalEntry(JournalEntry entry) {
-        if (entry == null) throw new IllegalArgumentException("JournalEntry no puede ser null");
-        EntityManager em = emf.createEntityManager();
-        EntityTransaction tx = em.getTransaction();
-        try {
-            tx.begin();
-            em.persist(entry);
-            tx.commit();
-            return entry;
-        } catch (RuntimeException ex) {
-            if (tx != null && tx.isActive()) {
-                tx.rollback();
-            }
-            throw ex;
-        } finally {
-            em.close();
-        }
+        executeWithTransaction(
+                em -> em.persist(entry),
+                "Error al guardar JournalEntry"
+        );
+        return entry; // Devuelve la entidad (ahora con ID)
     }
 
     /**
-     * Obtiene las entradas de un usuario ordenadas de más reciente a más antigua (createdAt DESC)
+     * 🟢 FASE VERDE
+     * Obtiene todas las entradas de diario de un usuario usando el helper 'executeQuery'.
      */
     @Override
     public List<JournalEntry> getJournalEntriesByUser(Integer userId) {
-        if (userId == null) return Collections.emptyList();
-        EntityManager em = emf.createEntityManager();
-        try {
+        return executeQuery(em -> {
             TypedQuery<JournalEntry> query = em.createQuery(
-                "SELECT j FROM JournalEntry j WHERE j.userId = :userId ORDER BY j.createdAt DESC",
-                JournalEntry.class
+                    "SELECT j FROM JournalEntry j WHERE j.userId = :userId ORDER BY j.createdAt DESC",
+                    JournalEntry.class
             );
             query.setParameter("userId", userId);
             return query.getResultList();
-        } finally {
-            em.close();
-        }
+        });
     }
 }
